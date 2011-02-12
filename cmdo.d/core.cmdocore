@@ -1,0 +1,599 @@
+#===============================================================================
+#===============================================================================
+# core - core cmdo exported functions
+#
+# Author Steve Cooper   steve@wijjo.com
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#===============================================================================
+#===============================================================================
+
+import inspect
+import os, os.path
+import re
+
+#===============================================================================
+
+class Integer(CMDO.TypeBase):
+    '''\
+An integer number.'''
+    def __init__(self, imin = None, imax = None, desc = 'integer', valueDef = None, descDef = None):
+        self.imin = imin
+        self.imax = imax
+        CMDO.TypeBase.__init__(self, desc = desc, valueDef = valueDef, descDef = descDef)
+    def convert(self, value):
+        try:
+            i = int(value)
+        except:
+            raise CMDO.ExcConversion('Argument must be (or convert to) an integer')
+        if self.imin is not None and i < self.imin:
+            raise CMDO.ExcConversion('Minimum value is %d' % self.imin)
+        if self.imax is not None and i > self.imax:
+            raise CMDO.ExcConversion('Maximum value is %d' % self.imax)
+        return i
+
+#===============================================================================
+
+class Boolean(CMDO.TypeBase):
+    '''\
+A true/false value.  Interprets (case-insensitive) "true"/"false", "yes"/"no",
+and zero/non-zero.'''
+    def __init__(self, desc = 'boolean', valueDef = None, descDef = None):
+        CMDO.TypeBase.__init__(self, desc = desc, valueDef = valueDef, descDef = descDef)
+    def convert(self, value):
+        # Integers just get cast
+        if type(value) is int or type(value) == bool:
+            return bool(value)
+        # Strings are ok, if it's one of the ones we look for
+        try:
+            s = value.lower()
+            if s == 'true' or s == 'yes':
+                return True
+            if s == 'false' or s == 'no':
+                return False
+        except:
+            pass
+        raise CMDO.ExcConversion(
+            'Boolean argument must be "true"/"false", "yes"/"no" or zero/non-zero.')
+
+#===============================================================================
+
+class String(CMDO.TypeBase):
+    '''\
+A text string.'''
+    def __init__(self, desc = 'string', valueDef = None, descDef = None):
+        CMDO.TypeBase.__init__(self, desc = desc, valueDef = valueDef, descDef = descDef)
+    def convert(self, value):
+        try:
+            return str(value)
+        except:
+            raise CMDO.ExcConversion('Argument must be (or convert to) a string')
+
+#===============================================================================
+
+class Path(String):
+    '''\
+An unchecked path string.'''
+    def __init__(self, desc = 'path', valueDef = None, descDef = None):
+        String.__init__(self, desc = desc, valueDef = valueDef, descDef = descDef)
+    def convert(self, value):
+        return os.path.expanduser(os.path.expandvars(value))
+
+#===============================================================================
+
+class PathFile(Path):
+    '''\
+A path to an existing file.'''
+    def __init__(self,
+            dirOk    = False,
+            relative = False,
+            desc     = 'file path',
+            valueDef = None,
+            descDef  = None):
+        self.dirOk    = dirOk
+        self.relative = relative
+        Path.__init__(self, desc = desc, valueDef = valueDef, descDef = descDef)
+    def convert(self, value):
+        path = Path.convert(self, value)
+        if self.dirOk:
+            if not os.path.exists(path):
+                raise CMDO.ExcPath('File or directory "%s" does not exist' % path)
+        else:
+            if not os.path.isfile(path):
+                raise CMDO.ExcPath('File "%s" does not exist' % path)
+        if self.relative:
+            return os.path.normpath(path)
+        return os.path.abspath(os.path.normpath(path))
+
+#===============================================================================
+
+class PathDirectory(Path):
+    '''\
+A path to an existing directory.'''
+    def __init__(self,
+            relative = False,
+            desc     = 'directory path',
+            valueDef = None,
+            descDef  = None,
+            create   = False):
+        self.relative = relative
+        self.create   = create
+        Path.__init__(self, desc = desc, valueDef = valueDef, descDef = descDef)
+    def convert(self, value):
+        path = Path.convert(self, value)
+        if not os.path.isdir(path):
+            if self.create:
+                CMDO.info('Creating directory "%s"' % path)
+                os.makedirs(path)
+            else:
+                raise CMDO.ExcPath('Directory "%s" does not exist' % path)
+        if self.relative:
+            return os.path.normpath(path)
+        return os.path.abspath(os.path.normpath(path))
+
+#===============================================================================
+
+class URL(String):
+    '''\
+An unchecked URL string.'''
+    def __init__(self, desc = 'URL', valueDef = None, descDef = None):
+        String.__init__(self, desc = desc, valueDef = valueDef, descDef = descDef)
+    def convert(self, value):
+        return String.convert(self, value)
+
+#===============================================================================
+
+class Command(String):
+    '''\
+An unchecked path string.'''
+    def __init__(self, desc = 'command', valueDef = None, descDef = None):
+        String.__init__(self, desc = desc, valueDef = valueDef, descDef = descDef)
+    def convert(self, value):
+        return os.path.expanduser(os.path.expandvars(value))
+
+#===============================================================================
+
+class Enum(String):
+    '''\
+Enumerated value from a list of possible values.'''
+    def __init__(self, values, desc = None, valueDef = None, descDef = None):
+        if not type(values) is list and not type(values) is tuple:
+            raise CMDO.ExcArgument('Enum values must be a list or a tuple')
+        self.values = values
+        String.__init__(self, desc = desc, valueDef = valueDef, descDef = descDef)
+        if self.desc:
+            self.desc = '%s %s' % (self.desc, self.getDescValues())
+        else:
+            self.desc = self.getDescValues()
+    def convert(self, value):
+        value = String.convert(self, value)
+        if value not in self.values:
+            raise CMDO.ExcArgument('Bad value "%s" - use (%s)' % (value, '|'.join(self.values)))
+        return value
+    def getDescValues(self):
+        v = [value for value in self.values if value != self.valueDef]
+        v.sort()
+        if self.valueDef:
+            v.insert(0, '%s*' % self.valueDef)
+        return '(%s)' % '|'.join(v)
+
+#===============================================================================
+
+class Publisher(Enum):
+    '''\
+Publication format, e.g. "text", "html" or "xml".'''
+    def __init__(self,
+            values   = CMDO.publishers.keys(),
+            desc     = 'publication format',
+            valueDef = 'text',
+            descDef  = None):
+        Enum.__init__(self, values, desc = desc, valueDef = valueDef, descDef = descDef)
+    def convert(self, value):
+        # It may already be a publisher
+        if hasattr(value, 'docBegin'):
+            return value
+        publisher = CMDO.publishers[Enum.convert(self, value)]()
+        publisher.debug = CMDO.debug
+        return publisher
+
+#===============================================================================
+
+class TagList(String):
+    '''\
+A comma-separated tag list.'''
+    def __init__(self, desc = 'name list', values = None, valueDef = [], descDef = None):
+        self.values = values
+        String.__init__(self, desc = desc, valueDef = valueDef, descDef = descDef)
+    def convert(self, value):
+        if type(value) is list:
+            values = value
+        elif type(value) is tuple:
+            values = list(value)
+        else:
+            values = str(value).split(',')
+        if self.values:
+            for v in values:
+                if v not in self.values:
+                    raise CMDO.ExcArgument('Bad value "%s" in list - use (%s)'
+                                                % (v, '|'.join(self.values)))
+        return values
+
+#===============================================================================
+
+class RegExp(CMDO.TypeBase):
+    '''\
+A regular expression for searches.'''
+    def __init__(self,
+            desc       = 'search expression',
+            valueDef   = None,
+            descDef    = None,
+            ignorecase = False):
+        self.flags = 0
+        if ignorecase:
+            self.flags |= re.IGNORECASE
+        CMDO.TypeBase.__init__(self, desc = desc, valueDef = valueDef, descDef = descDef)
+    def convert(self, value):
+        return re.compile(value, self.flags)
+
+#===============================================================================
+
+class Function(CMDO.TypeBase):
+    '''\
+A named function.'''
+    def __init__(self,
+            desc     = 'function name or reference',
+            valueDef = None,
+            descDef  = None):
+        CMDO.TypeBase.__init__(self, desc = desc, valueDef = valueDef, descDef = descDef)
+    def convert(self, value):
+        # Is it a core Function object?  Use it.
+        if hasattr(value, '_fixDefs'):
+            return value
+        if not CMDO.isString(value):
+            raise CMDO.ExcArgument('function must be string or function object')
+        func = CMDO.getFunction(value)
+        if not func:
+            raise CMDO.ExcArgument('%s is not a known function' % value)
+        return func
+
+#===============================================================================
+
+class Code(CMDO.TypeBase):
+    '''\
+A named module and or function.  Returns an object representing the code.'''
+    class Data(object):
+        def __init__(self, path, lineno):
+            self.path   = path
+            self.lineno = lineno
+    def __init__(self,
+            desc     = 'code module and or function',
+            create   = False,
+            valueDef = None,
+            descDef  = None):
+        self.create = create
+        CMDO.TypeBase.__init__(self, desc = desc, valueDef = valueDef, descDef = descDef)
+    def convert(self, value):
+        data = None
+        # Is it a core Function object?  Use it.
+        if hasattr(value, '_fixDefs'):
+            data = Code.Data(value.path, value.lineno)
+        else:
+            if not CMDO.isString(value):
+                raise CMDO.ExcArgument('function must be string or function object')
+            (mod, func) = CMDO.getModuleFunction(value)
+            if func:
+                data = Code.Data(func.path, func.lineno)
+            elif mod:
+                data = Code.Data(mod.path, None)
+            elif self.create:
+                dir = CMDO.program.dirsScript[0]
+                if not os.path.exists(dir):
+                    CMDO.info('Creating directory "%s"...' % dir)
+                    os.makedirs(dir)
+                names = value.split('.')
+                if len(names) > 2:
+                    CMDO.error('Bad name "%s"' % value)
+                path = os.path.join(dir, names[0] + CMDO.extModule)
+                lineno = None
+                if not os.path.exists(path):
+                    CMDO.info('Creating module "%s" ...' % path)
+                    try:
+                        f = open(path, 'w')
+                        try:
+                            f.write('# Generated module %s\n' % names[0])
+                        finally:
+                            f.close()
+                    except IOError:
+                        raise CMDO.ExcFile('Unable to create "%s"' % path)
+                if len(names) > 1:
+                    try:
+                        f = open(path, 'a')
+                        try:
+                            f.write('''
+# Generated function %s
+CMDO.export()
+def %s():
+    # Your code goes here
+    pass''' % (value, names[1]))
+                        finally:
+                            f.close()
+                    except IOError:
+                        raise CMDO.ExcFile('Unable to append to "%s"' % path)
+                    # Assume we can read the file if we wrote it
+                    f = open(path)
+                    lineno = len(f.readlines())
+                    f.close()
+                data = Code.Data(path, lineno)
+        if not data:
+            raise CMDO.ExcArgument('unable to find code for "%s"' % value)
+        return data
+
+#===============================================================================
+
+class GUI(Enum):
+    '''\
+GUI driver.'''
+    def __init__(self,
+            values   = CMDO.guis.keys(),
+            desc     = 'GUI driver',
+            valueDef = 'text',
+            descDef  = None):
+        Enum.__init__(self, values, desc = desc, valueDef = valueDef, descDef = descDef)
+    def convert(self, value):
+        # It may already be a gui driver object
+        if hasattr(value, 'promptArgs'):
+            return value
+        if not CMDO.isString(value):
+            raise CMDO.ExcArgument('must be a GUI driver name or reference')
+        gui = CMDO.guis[Enum.convert(self, value)]()
+        gui.debug = CMDO.debug
+        return gui
+
+#===============================================================================
+
+@CMDO.export(
+    TagList(desc = 'help names'),
+    orderBy  = TagList(desc = 'order by names', valueDef = None),
+    format   = Publisher,
+    input    = Path(desc = 'input path'),
+    output   = Path(desc = 'output path', descDef = 'stdout'),
+    view     = Boolean(desc = 'open in mime type viewer', valueDef = False),
+    heading  = String(desc = 'top level heading text'),
+    plain    = Boolean(desc = 'disable heading wrapper'),
+    text     = String(desc = 'structured text'),
+    title    = String(desc = 'page title'),
+    tocStart = Integer(desc = 'table of contents start level', valueDef = 0),
+    tocStop  = Integer(desc = 'table of contents stop level', valueDef = 2),
+    style    = Enum(['medium', 'small'], desc = 'page style', valueDef = 'medium'),
+)
+def help(
+    namesFind,
+    orderBy  = None,
+    format   = None,
+    input    = None,
+    output   = None,
+    view     = None,
+    heading  = None,
+    plain    = False,
+    text     = None,
+    title    = None,
+    tocStart = None,
+    tocStop  = None,
+    style    = None,
+):
+    '''
+    Publish text or other format documentation selected by property name(s) to
+    screen or file.  Optionally load into viewer based on mailcap application
+    assignments for document type.
+    '''
+
+    # Force-load everything to make all documentation available
+    CMDO.engine.loadAll()
+    CMDO.program.loadAll()
+
+    nodes = []
+
+    if text is not None:
+        node = CMDO.docParseString(text)
+        if node:
+            nodes.append(node)
+
+    if input is not None:
+        node = CMDO.docParse(input)
+        if node:
+            nodes.append(node)
+
+    if namesFind:
+
+        # First try modules (sort by module)
+        where = lambda o: o.book == CMDO.program.name and o.module in namesFind
+        for node in CMDO.doc.query(where = where, orderBy = 'module'):
+            nodes.extend(node.getChildren())
+
+        # Then try core modules (sort by module)
+        where = lambda o: o.book == CMDO.program.name and o.core in namesFind
+        for node in CMDO.doc.query(where = where, orderBy = 'core'):
+            nodes.extend(node.getChildren())
+
+        # If it's not a program module, try the engine.
+        if not nodes and CMDO.program.name != CMDO.engine.name:
+            where = lambda o: o.book == CMDO.engine.name and o.module in namesFind
+            for node in CMDO.doc.query(where = where, orderBy = 'module'):
+                nodes.extend(node.getChildren())
+            where = lambda o: o.book == CMDO.engine.name and o.core in namesFind
+            for node in CMDO.doc.query(where = where, orderBy = 'core'):
+                nodes.extend(node.getChildren())
+
+        # Then try functions (sort by function)
+        where = lambda o: o.function in namesFind
+        nodes.extend(CMDO.doc.query(where = where, orderBy = 'function'))
+
+        # Then try keywords (sort order by tag value or explicit orderBy)
+        if orderBy is None:
+            orderBy = namesFind
+        where = lambda o: len([s for s in namesFind if s in o and o[s]])
+        nodes.extend(CMDO.doc.query(where = where, orderBy = orderBy))
+
+        if not nodes:
+            CMDO.error('Help not found for %s' % ' '.join([name for name in namesFind]))
+
+    elif not nodes:
+
+        where = lambda o: o.book == CMDO.program.name and o.module
+        nodesFunction = CMDO.doc.query(where = lambda o: o.function, orderBy = ['function'])
+        names = [node.getProp('function') for node in nodesFunction]
+        if nodesFunction:
+            nodes.append(CMDO.doc.section('Functions', CMDO.doc.list(None, *names)))
+        nodesModule = CMDO.doc.query(where = where, orderBy = ['module'])
+        names = [node.getProp('module') for node in nodesModule]
+        if nodesModule:
+            nodes.append(CMDO.doc.section('Topics', CMDO.doc.list(None, *names)))
+        nodes.append(CMDO.doc.section('Keywords', CMDO.doc.list(None, *CMDO.doc.getKeywords())))
+        if not title:
+            title = '%s help' % CMDO.program.name
+
+    if nodes:
+        # Use the given heading as the title?
+        if not title:
+            if heading:
+                title = heading
+        # Use the first heading as the title?
+        if not title and not namesFind:
+            nodesHeading = CMDO.doc.select(nodes, where = lambda p: 'heading' in p)
+            if nodesHeading:
+                title = nodesHeading[0].getProp('heading')
+        # Synthesize a title?
+        if not title:
+            title = '%s help %s' % (CMDO.program.name.capitalize(), ' '.join(namesFind))
+        # Wrap it only if there's more than one node
+        if len(nodes) == 1:
+            node = nodes[0]
+            if not node.hasProp('heading'):
+                if heading:
+                    node.setProp('heading', heading)
+                elif not plain:
+                    node.setProp('heading', title)
+            if not node.hasProp('title'):
+                node.setProp('title', title)
+        elif heading:
+            node = CMDO.doc.block(heading = heading, title = title, *nodes)
+        else:
+            if plain:
+                node = CMDO.doc.block(title = title, *nodes)
+            else:
+                node = CMDO.doc.block(heading = title, title = title, *nodes)
+        node.publish(format, output,
+            view     = view,
+            tocStart = tocStart,
+            tocStop  = tocStop,
+            style    = style)
+
+#===============================================================================
+
+@CMDO.export(
+    Path(desc = 'input path'),
+    format   = Publisher,
+    output   = Path(desc = 'output path', descDef = 'stdout'),
+    view     = Boolean(desc = 'open in mime type viewer', valueDef = False),
+    tocStart = Integer(desc = 'table of contents start level', valueDef = 0),
+    tocStop  = Integer(desc = 'table of contents stop level', valueDef = 2),
+    style    = Enum(['medium', 'small'], desc = 'page style', valueDef = 'medium'),
+)
+def publish(
+    input,
+    format   = None,
+    output   = None,
+    view     = None,
+    tocStart = None,
+    tocStop  = None,
+    style    = None,
+):
+    '''
+    Publish structured text in specified or default format to screen or file.
+    Optionally load into viewer based on mailcap application assignments for
+    document type.
+    '''
+    help(
+        input    = input,
+        format   = format,
+        output   = output,
+        view     = view,
+        tocStart = tocStart,
+        tocStop  = tocStop,
+        style    = style,
+        plain    = True
+    )
+
+#===============================================================================
+
+@CMDO.internal
+def bash_complete():
+    '''Hook for bash completion.  Just lists functions for now.'''
+    names = []
+    for export in CMDO.engine.exports.iterSorted():
+        for function in export.iterFunctionsSorted():
+            names.append(function.name)
+    if CMDO.program.name != CMDO.engine.name:
+        for export in CMDO.program.exports.iterSorted():
+            for function in export.iterFunctionsSorted():
+                names.append(function.name)
+    names.sort()
+    CMDO.info('\n'.join(names))
+
+#===============================================================================
+
+@CMDO.export
+def version():
+    if CMDO.program.name != CMDO.engine.name:
+        CMDO.info('%s %s' % (CMDO.program.name, CMDO.program.version))
+    CMDO.info('%s %s' % (CMDO.engine.name, CMDO.engine.version))
+
+#===============================================================================
+
+@CMDO.export(Function, gui = GUI)
+def prompt(func, gui = None):
+    '''Provide simple prompted GUI for function call.'''
+    args = []
+    kwargs = {}
+    gui.promptArgs(func, args, kwargs)
+    CMDO.info('\n')
+    func.func(*args, **kwargs)
+
+#===============================================================================
+
+@CMDO.export(
+    Code(desc = 'module and or function to edit', create = True),
+)
+def edit(
+    code,
+):
+    '''
+    Edit new or existing module code using mailcap editor application.
+    '''
+
+    # Force-load everything to discover all available modules
+    CMDO.engine.loadAll()
+    CMDO.program.loadAll()
+
+    nodes = []
+
+    editor = CMDO.getTextEditor(code.path, code.lineno)
+    if editor:
+        CMDO.info(editor.cmd)
+        editor.run()
+    else:
+        CMDO.warning('No editor found')
+
+# vim: filetype=python

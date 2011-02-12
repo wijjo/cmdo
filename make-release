@@ -1,0 +1,26 @@
+#!/bin/sh
+
+abort()
+{
+    echo "<abort>"
+    echo "===== Error Log (make-release.err) ====="
+    test -f make-release.err && cat make-release.err
+    echo ""
+    exit 1
+}
+
+run()
+{
+    echo ":::Run::: \"$*\"" | tee -a make-release.log | tee -a make-release.err
+    ($* 2>> make-release.err >> make-release.log) || abort
+}
+
+test -f make-release.log && rm make-release.log
+test -f make-release.err && rm make-release.err
+
+run rm MANIFEST
+run python setup.py build
+run sudo debian/rules clean
+run fakeroot debian/rules binary
+run python setup.py sdist
+run mv dist/*.tar.gz ..

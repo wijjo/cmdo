@@ -1,0 +1,586 @@
+#!/usr/bin/env python
+#===============================================================================
+#===============================================================================
+# Ardo implementation
+#
+# Ardo is both a sample cmdo application and a useful quick archiving tool.
+#
+# TODO:
+#   - Support restoration from non-tarball archives.
+#   - Support thinning out the saved archives, e.g. reduce to one
+#     archive per day or week.
+#   - Support per-directory options by looking for a .larchrc file.
+#
+# Author Steve Cooper   steve@wijjo.com
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#===============================================================================
+#===============================================================================
+
+import sys
+import os
+import os.path
+import re
+from time import strftime
+from glob import glob
+
+#===============================================================================
+
+class Global(object):
+
+    subdir = '.%s' % CMDO.program.name
+
+    # Filespecs for --ignoreobj option exclusions
+    excObjPats = ("*.o", "*.so", "*.pyc", "*.Plo", "*.la", "*.lai", "*.lo", "*.a", "*/.*")
+    # Subdirectories ignored for --ignorevcs option
+    excVCSDirs = ('.svn', '.cvs')
+    patArchive = '"%s"-[0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]*'
+
+    reTarballTrailer = re.compile('^[.]%s/(.*)-([0-9]+-[0-9]+)([.]tar)?[.](gz|bz2)$'
+                                        % CMDO.program.name)
+    reNumberWithDefault = re.compile('^[0-9]*$')
+    reYesNo = re.compile('[yn]?', re.IGNORECASE)
+
+    # The platforms where "cp" doesn't support -a
+    #TODO: Add others (e.g. bsd?), even better - switch to shutil.
+    platformsSimpleCp = ['darwin']
+
+    if sys.platform in platformsSimpleCp:
+        cpcmd = 'cp -Rpv'
+    else:
+        cpcmd = 'cp -av'
+
+    # Display progress with "pv", if available.
+    pvAvailable = CMDO.findProgram('pv')
+
+#===============================================================================
+
+def Q(*args):
+    return '"%s"' % ''.join([s.replace('"', '\\"') for s in args])
+
+#===============================================================================
+
+class Runner(object):
+    def __init__(self, echo = False, dryRun = False):
+        self.echo   = echo
+        self.dryRun = dryRun
+        self.cmds   = []
+        self.cur    = 0
+    def append(self, *cmd):
+        self.cmds.append(list(cmd))
+        self.cur = len(self.cmds) - 1
+        return self.cur
+    def insert(self, *cmd):
+        self.cmds.insert(self.cur, list(cmd))
+        return self.cur
+    def rewind(self, pos = 0):
+        assert pos >= 0 and pos < len(self.cmds)
+        self.cur = pos
+    def addArgs(self, *args):
+        assert self.cur >= 0 and self.cur < len(self.cmds)
+        self.cmds[self.cur].extend(args)
+    def run(self):
+        for cmd in self.cmds:
+            scmd = ' '.join(cmd)
+            if self.dryRun:
+                CMDO.info('>>> %s' % scmd)
+            elif self.echo:
+                CMDO.info(scmd)
+            if not self.dryRun:
+                os.system(scmd)
+
+#===============================================================================
+
+class Options(object):
+    def __init__(self, **opts):
+        self._opts = opts
+    def __getattr__(self, name):
+        return self._opts.get(name)
+
+#===============================================================================
+
+def checkSubdir():
+    if not os.path.isdir(Global.subdir):
+        if os.path.exists(Global.subdir):
+            CMDO.quit('"%s" exists and is not a directory' % Global.subdir)
+        CMDO.info('Creating %s...' % Global.subdir)
+        os.mkdir(Global.subdir)
+
+#===============================================================================
+
+class ArchiveItem(object):
+
+    def __init__(self, path, **opts):
+        checkSubdir()
+        self.path      = path
+        self.options   = Options(**opts)
+        self.timestamp = getTimestamp()
+        self.name      = '%s-%s' % (self.path.replace('/', '_'), self.timestamp)
+        self.target    = os.path.join(self.options.target, self.name)
+
+#===============================================================================
+
+class ArchiveTarball(ArchiveItem):
+
+    @staticmethod
+    def forPath(path, **opts):
+        m = Global.reTarballTrailer.match(path)
+        if m is None or m.group(3) != '.tar':
+            return None
+        if m.group(4) == 'bz2':
+            return ArchiveTarball(path, 'bzip2', **opts)
+        return ArchiveTarball(path, 'gzip', **opts)
+
+    def __init__(self, path, compression, **opts):
+        ArchiveItem.__init__(self, path, **opts)
+        self.compression = compression
+        if self.compression == 'bzip2':
+            self.tarCompOpt = 'j'
+            self.tarExt = '.tar.bz2'
+        else:
+            self.tarCompOpt = 'z'
+            self.tarExt = '.tar.gz'
+        if Global.pvAvailable and not self.options.noprogress:
+            self.tarCreateOpts = ['-c%s' % self.tarCompOpt, '-f']
+        else:
+            self.tarCreateOpts = ['-cv%s' % self.tarCompOpt, '-f']
+        self.tarRestoreOpts = '-%s%s%s' % ('x', self.tarCompOpt, 'pf')
+        self.tarCompareOpts = '-%s%s%s' % ('d', self.tarCompOpt, 'f')
+
+    def create(self):
+        runner = Runner(dryRun = self.options.dryrun)
+        runner.append('tar')
+        # Add object file exclusions?
+        if self.options.ignoreobj:
+            for pat in Global.excObjPats:
+                runner.addArgs('--exclude', Q(pat))
+        # Add VCS exclusions?
+        if self.options.ignorevcs:
+            for pat in Global.excVCSDirs:
+                runner.addArgs('--exclude', Q('*/', pat, '/*'))
+        # Add tar options based on compression type
+        runner.addArgs(*self.tarCreateOpts)
+        # Complete command line for running with or without pv
+        if Global.pvAvailable and not self.options.noprogress:
+            runner.addArgs('-', Q(self.path), '|', 'pv', '-rbt', '>', Q(self.target, self.tarExt))
+            runner.insert('echo', Q('Creating "', self.target, self.tarExt, '"...'))
+        else:
+            runner.addArgs(Q(self.target, self.tarExt), Q(self.path))
+        # Delete original when done?
+        if self.options.delete:
+            runner.append('rm', '-rvf', Q(self.path))
+        # Run command batch
+        runner.run()
+
+    def restore(self):
+        dir = CMDO.getVersionedPath(os.path.basename(self.path)[:-len(self.tarExt)])
+        os.mkdir(dir)
+        CMDO.info('Restoring to "%s"...' % dir)
+        os.system('tar %s "%s" --strip-components 1 -C "%s"'
+                        % (self.tarRestoreOpts, self.path, dir))
+
+    def compare(self):
+        os.system('tar %s "%s"' % (self.tarCompareOpts))
+
+#===============================================================================
+
+class ArchiveZip(ArchiveItem):
+
+    @staticmethod
+    def forPath(path, **opts):
+        m = Global.reTarballTrailer.match(path)
+        if m is None or m.group(3) != '.zip':
+            return None
+        return ArchiveZip(path, **opts)
+
+    def __init__(self, path, **opts):
+        ArchiveItem.__init__(self, path, **opts)
+
+    def create(self):
+        runner = Runner(dryRun = self.options.dryrun)
+        runner.append('zip', '-r')
+        #TODO: Add object file exclusions?
+        #TODO: Add VCS exclusions?
+        runner.addArgs(Q(self.target, '.zip'), Q(self.path))
+        # Delete original when done?
+        if self.options.delete:
+            runner.append('rm', '-rvf', Q(self.path))
+        # Run command batch
+        runner.run()
+
+    def restore(self):
+        raise CMDO.ExcBase('Restore is not yet implemented for zip compression.')
+
+    def compare(self):
+        raise CMDO.ExcBase('Compare is not yet implemented for zip compression.')
+
+#===============================================================================
+
+class ArchiveP7Zip(ArchiveItem):
+
+    @staticmethod
+    def forPath(path, **opts):
+        m = Global.reTarballTrailer.match(path)
+        if m is None or m.group(3) != '.7z':
+            return None
+        return ArchiveP7Zip(path, **opts)
+
+    def __init__(self, path, **opts):
+        ArchiveItem.__init__(self, path, **opts)
+
+    def create(self):
+        runner = Runner(dryRun = self.options.dryrun)
+        runner.append('7z', 'a')
+        #TODO: Add object file exclusions?
+        #TODO: Add VCS exclusions?
+        runner.addArgs(Q(self.target, '.7z'), Q(self.path))
+        # Delete original when done?
+        if self.options.delete:
+            runner.append('rm', '-rvf', Q(self.path))
+        # Run command batch
+        runner.run()
+
+    def restore(self):
+        raise CMDO.ExcBase('Restore is not yet implemented for p7zip compression.')
+
+    def compare(self):
+        raise CMDO.ExcBase('Compare is not yet implemented for p7zip compression.')
+
+#===============================================================================
+
+class ArchiveCompressedFile(ArchiveItem):
+
+    @staticmethod
+    def forPath(path, **opts):
+        m = Global.reTarballTrailer.match(path)
+        ext = os.path.splitext(path)[1]
+        if m is not None:
+            return None
+        if ext == '.gz':
+            return ArchiveCompressedFile(path, 'gzip', **opts)
+        if ext == '.bz2':
+            return ArchiveCompressedFile(path, 'bzip2', **opts)
+        return None
+
+    def __init__(self, compression, **opts):
+        ArchiveItem.__init__(self, path, **opts)
+        self.compression = compression
+
+    def create(self):
+        runner = Runner(dryRun = self.options.dryrun)
+        # Move or copy the file to the archive subdirectory
+        if self.options.delete:
+            runner.append('mv', '-v', Q(self.path), Q(self.target))
+        else:
+            runner.append(Global.cpcmd, Q(self.path), Q(self.target))
+        # Then compress it
+        runner.append(self.compression, Q(self.target))
+        # Run command batch
+        runner.run()
+
+    def restore(self):
+        pass
+
+    def compare(self):
+        pass
+
+#===============================================================================
+
+class ArchiveDirectory(ArchiveItem):
+
+    @staticmethod
+    def forPath(path, **opts):
+        if not os.path.isdir(path):
+            return None
+        return ArchiveDirectory(path, **opts)
+
+    def __init__(self, path, **opts):
+        ArchiveItem.__init__(self, path, **opts)
+
+    def create(self):
+        runner = Runner(dryRun = self.options.dryrun)
+        if self.options.delete:
+            runner.append('mv', '-v', Q(self.path), Q(self.target))
+        else:
+            runner.append(Global.cpcmd, Q(self.path), Q(self.target))
+        runner.run()
+
+    def restore(self):
+        target = CMDO.getVersionedPath(path)
+        runner = Runner(dryRun = self.options.dryrun)
+        runner.append(Global.cpcmd, Q(path), Q(target))
+        CMDO.info('Restoring to "%s"...' % target)
+        runner.run()
+
+#===============================================================================
+
+class ArchiveFile(ArchiveItem):
+
+    @staticmethod
+    def forPath(path, **opts):
+        m = Global.reTarballTrailer.match(path)
+        if m is not None or os.path.isdir(path):
+            return None
+        return ArchiveFile(path, **opts)
+
+    def __init__(self, path, **opts):
+        ArchiveItem.__init__(self, path, **opts)
+
+    def create(self, path):
+        runner = Runner(dryRun = self.options.dryrun)
+        if self.options.delete:
+            runner.append('mv', '-v', Q(path), Q(self.target))
+        else:
+            runner.append(Global.cpcmd, Q(path), Q(self.target))
+        runner.run()
+
+    def restore(self, path):
+        target = CMDO.getVersionedPath(path)
+        runner = Runner(dryRun = self.options.dryrun)
+        runner.append(Global.cpcmd, Q(path), Q(target))
+        CMDO.info('Restoring to "%s"...' % target)
+        runner.run()
+
+#===============================================================================
+
+class FMFactory(object):
+    @staticmethod
+    def forPath(path, **opts):
+        for fmCls in (
+                ArchiveTarball,
+                ArchiveZip,
+                ArchiveP7Zip,
+                ArchiveDirectory,
+                ArchiveFile,
+                ArchiveCompressedFile
+        ):
+            fm = fmCls.forPath(path, **opts)
+            if fm:
+                return fm
+        CMDO.quit('"%s" is not a supported type' % path)
+
+#===============================================================================
+
+def choose(name):
+
+    if not os.path.isdir(Global.subdir):
+        CMDO.quit('No %s directory exists' % Global.subdir)
+    if name[-1] == '/':
+        name = name[:-1]
+    pat = os.path.join(Global.subdir, Global.patArchive % name)
+    archives = []
+    for a in os.popen('ls %s' % pat):
+        archives.insert(0, a.strip())
+    if len(archives) == 0:
+        CMDO.quit('No archives found')
+    CMDO.info('Newest archive is at the top.  Empty input or zero response cancels the action.')
+    for i in range(len(archives)):
+        CMDO.info('%d) %s' % (i+1, archives[i]))
+    CMDO.info('')
+    path = None
+    while path is None:
+        i = int(prompt('Select archive (1-n [none])', Global.reNumberWithDefault, '0'))
+        if i <= 0:
+            CMDO.quit('Canceled')
+        if i-1 < len(archives):
+            path = archives[i-1]
+        else:
+            CMDO.error('bad index %d' % i)
+    return (path, FMFactory.forPath(path))
+
+#===============================================================================
+
+def prompt(msg, re, default):
+
+    while True:
+        sys.stdout.write('%s: ' % msg)
+        try:
+            s  = sys.stdin.readline().strip()
+            if re.match(s):
+                if not s:
+                    return default
+                return s
+            CMDO.error('bad input - try again')
+        except KeyboardInterrupt:
+            CMDO.quit('', 'Keyboard interrupt')
+
+#===============================================================================
+
+def promptYesNo(msg, default = False):
+    if default:
+        yn = 'Y/n'
+        sdef = 'y'
+    else:
+        yn = 'y/N'
+        sdef = 'n'
+    return (prompt('%s (%s)' % (msg, yn), Global.reYesNo, sdef).lower() == 'y')
+
+#===============================================================================
+
+def getTimestamp():
+    return strftime('%y%m%d-%H%M%S')
+
+#===============================================================================
+
+class PathList(CMDO.More):
+    def __init__(self):
+        CMDO.More.__init__(self,
+            CMDO.PathFile(dirOk = True, relative = True),
+            countMin = 1,
+            desc = 'files or directories'
+        )
+
+#===============================================================================
+
+class DeleteOption(CMDO.Boolean):
+    def __init__(self):
+        CMDO.Boolean.__init__(self, desc = 'delete files after archiving', valueDef = 'no')
+
+#===============================================================================
+
+class SourceOnlyOption(CMDO.Boolean):
+    def __init__(self):
+        CMDO.Boolean.__init__(self, desc = 'ignore %s' % ' '.join(Global.excObjPats), valueDef = 'no')
+
+#===============================================================================
+
+class IgnoreVCSOption(CMDO.Boolean):
+    def __init__(self):
+        CMDO.Boolean.__init__(self, desc = 'ignore %s subdirectories' % ' '.join(Global.excVCSDirs),
+                              valueDef = 'no')
+
+#===============================================================================
+
+class DryRunOption(CMDO.Boolean):
+    def __init__(self):
+        CMDO.Boolean.__init__(self, desc = 'perform dry run', valueDef = 'no')
+
+#===============================================================================
+
+class NoProgressOption(CMDO.Boolean):
+    def __init__(self):
+        CMDO.Boolean.__init__(self, desc = 'disable progress meter', valueDef = 'no')
+
+#===============================================================================
+
+class TargetOption(CMDO.PathDirectory):
+    def __init__(self):
+        CMDO.PathDirectory.__init__(self, desc = 'target directory', valueDef = Global.subdir, create = True)
+
+#===============================================================================
+
+# Use **opts, not keywords, to avoid arbitrary assignment of files to # options.
+@CMDO.export(
+    PathList,
+    delete     = DeleteOption,
+    ignoreobj  = SourceOnlyOption,
+    ignorevcs  = IgnoreVCSOption,
+    dryrun     = DryRunOption,
+    noprogress = NoProgressOption,
+    target     = TargetOption
+)
+def save(*files, **opts):
+    for f in files:
+        for path in glob(f):
+            fm = FMFactory.forPath(path, **opts)
+            fm.create(path)
+
+#===============================================================================
+
+@CMDO.export(
+    PathList,
+    delete     = DeleteOption,
+    ignoreobj  = SourceOnlyOption,
+    ignorevcs  = IgnoreVCSOption,
+    dryrun     = DryRunOption,
+    noprogress = NoProgressOption,
+    target     = TargetOption
+)
+def gzip(*files, **opts):
+    for f in files:
+        for path in glob(f):
+            fm = ArchiveTarball(path, "gzip", **opts)
+            fm.create()
+
+#===============================================================================
+
+@CMDO.export(
+    PathList,
+    delete     = DeleteOption,
+    ignoreobj  = SourceOnlyOption,
+    ignorevcs  = IgnoreVCSOption,
+    dryrun     = DryRunOption,
+    noprogress = NoProgressOption,
+    target     = TargetOption
+)
+def bzip2(*files, **opts):
+    for f in files:
+        for path in glob(f):
+            fm = ArchiveTarball(path, "bzip2", **opts)
+            fm.create()
+
+#===============================================================================
+
+@CMDO.export(
+    PathList,
+    delete     = DeleteOption,
+    ignoreobj  = SourceOnlyOption,
+    ignorevcs  = IgnoreVCSOption,
+    dryrun     = DryRunOption,
+    noprogress = NoProgressOption,
+    target     = TargetOption
+)
+def zip(*files, **opts):
+    for f in files:
+        for path in glob(f):
+            fm = ArchiveZip(path, **opts)
+            fm.create()
+
+#===============================================================================
+
+@CMDO.export(
+    PathList,
+    delete     = DeleteOption,
+    ignoreobj  = SourceOnlyOption,
+    ignorevcs  = IgnoreVCSOption,
+    dryrun     = DryRunOption,
+    noprogress = NoProgressOption,
+    target     = TargetOption
+)
+def p7zip(*files, **opts):
+    for f in files:
+        for path in glob(f):
+            fm = ArchiveP7Zip(path, **opts)
+            fm.create()
+
+#===============================================================================
+
+@CMDO.export(PathList)
+def restore(*files, **opts):
+    options = Options(**opts)
+    for name in files:
+        (path, fm) = choose(name)
+        fm.restore(path)
+
+#===============================================================================
+
+@CMDO.export(PathList)
+def compare(*files, **opts):
+    options = Options(**opts)
+    for name in files:
+        (path, fm) = choose(name)
+        fm.compare(path)
+
+# vim: filetype=python

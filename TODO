@@ -1,0 +1,5 @@
+After Release
+-------------
+* Non-English language support in the text publisher's wrapping algorithm.
+* Generate new project, including setup.py and debian (?).
+* Additional structured text formatting options, like bold, italic...

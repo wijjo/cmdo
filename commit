@@ -1,0 +1,4 @@
+#!/bin/sh
+git commit -m '' || exit 1
+git remote add origin git@github.com:coops222/CmDO.git || exit 1
+git push origin master

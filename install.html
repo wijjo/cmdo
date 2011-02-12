@@ -1,0 +1,364 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+
+<title>Cmdo help install</title>
+
+<style type="text/css">
+* {
+    font-size: 12pt;
+}
+
+.h1bar {
+    background-color: #aaaaff;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    padding: 4px;
+    width: 100%;
+    height: auto;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.h1barheading {
+    font-size: 16pt;
+    font-weight: bold;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 4px;
+}
+
+.h1bartopcell {
+    text-align: right;
+}
+
+.h1bartoplink {
+    font-size: 11pt;
+    text-indent: 1em;
+    padding: 2px;
+}
+
+.h2bar {
+    background-color: #e8e8ff;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    padding: 2px;
+    width: 100%;
+    height: auto;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.h2barheading {
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 2px;
+}
+
+.h2bartopcell {
+    text-align: right;
+}
+
+.h2bartoplink {
+    font-size: 11pt;
+    text-indent: 1em;
+    padding: 2px;
+}
+
+.heading1 {
+    background-color: #aaaaff;
+    font-size: 16pt;
+    font-weight: bold;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 4px;
+}
+
+.heading2 {
+    background-color: #e8e8ff;
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 2px;
+}
+
+.heading3 {
+    border-bottom: 1px solid gray;
+    width: auto;
+    font-size: 13pt;
+    font-weight: bold;
+    margin-top: 24px;
+    margin-bottom: 12px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0;
+}
+
+.heading4 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0;
+}
+
+.heading5 {
+    font-size: 12pt;
+    font-weight: italic;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0;
+}
+
+.heading6 {
+    font-size: 11pt;
+    font-weight: italic;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0;
+}
+
+.gentable {
+    border: 1px solid gray;
+    margin-bottom: 8px;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.genheader {
+    border: 1px solid gray;
+    background-color: #F2F2FF;
+    padding: 2px 4px;
+}
+
+.genrow {
+}
+
+.gencell {
+    border: 1px solid gray;
+    padding: 2px 4px;
+}
+
+ol {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: -8px;
+    margin-right: 0px;
+}
+
+ol li {
+    list-style-type: decimal;
+}
+
+ul li {
+}
+
+p {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0;
+}
+
+pre {
+    background-color: #eeeeee;
+    font-size: 10pt;
+}
+
+.tocblock {
+    border: 1px solid gray;
+    background-color: #eeeeff;
+    padding: 10px;
+    margin: 20px;
+}
+
+.toc0 {
+}
+
+.toc1 {
+    padding-top: 10px;
+    font-weight: bold;
+}
+
+.toc2 {
+    padding-left: 16px;
+}
+
+.toc3 {
+    padding-left: 32px;
+}
+
+.toc4 {
+    padding-left: 48px;
+}
+
+.block {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+</style>
+
+<style type="text/css" media="print">
+.h1bartoplink {
+    display: none;
+}
+
+.h2bartoplink {
+    display: none;
+}
+
+.tocblock {
+    display: none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1 class="heading1">Installation Instructions</h1>
+  <div id="toc" class="tocblock">
+    <div class="toc1"><a href=#tocitem1>Direct Install</a></div>
+      <div class="toc2"><a href=#tocitem2>Using script</a></div>
+      <div class="toc2"><a href=#tocitem3>Using setup.py</a></div>
+    <div class="toc1"><a href=#tocitem4>Getting Help</a></div>
+    <div class="toc1"><a href=#tocitem5>Uninstall</a></div>
+    <div class="toc1"><a href=#tocitem6>Create source tarball</a></div>
+    <div class="toc1"><a href=#tocitem7>Create binary tarball</a></div>
+    <div class="toc1"><a href=#tocitem8>Debian install</a></div>
+    <div class="toc1"><a href=#tocitem9>Debian uninstall</a></div>
+    <div class="toc1"><a href=#tocitem10>RPM install</a></div>
+  </div>
+  <span id="tocitem1">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">Direct Install</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+    <span id="tocitem2">
+    <h3 class="heading3">Using script</h3>
+<pre>
+./install</pre>
+
+      <div class="block">
+      It will prompt for a sudo password as needed.
+      </div>
+    </span>
+    <span id="tocitem3">
+    <h3 class="heading3">Using setup.py</h3>
+<pre>
+sudo python setup.py install</pre>
+
+    </span>
+  </span>
+  <span id="tocitem4">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">Getting Help</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+<pre>
+python setup.py --help
+python setup.py --help-commands</pre>
+
+  </span>
+  <span id="tocitem5">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">Uninstall</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+<pre>
+./uninstall</pre>
+
+    <div class="block">
+    Read messages carefully before saying "yes" to proceed. It will prompt for a
+    sudo password as needed.
+    </div>
+  </span>
+  <span id="tocitem6">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">Create source tarball</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+<pre>
+python setup.py sdist</pre>
+
+    <div class="block">
+    A tarball is created in the dist subdirectory.
+    </div>
+  </span>
+  <span id="tocitem7">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">Create binary tarball</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+<pre>
+python setup.py bdist</pre>
+
+    <div class="block">
+    A tarball is created in the dist subdirectory.
+    </div>
+  </span>
+  <span id="tocitem8">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">Debian install</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+    <div class="block">
+    These commands create the ".deb" package in the parent directory. If you
+    downloaded a pre-build ".deb" package skip this step and just run the "dpkg
+    -i" command that follows.
+    </div>
+    <div class="block">
+    This procedure for building the package requires requires fakeroot, cdbs,
+    and debhelper. At least these are what's needed on Ubuntu Feisty Fawn.
+    Here's how you can get the missing packages.
+    </div>
+<pre>
+sudo apt-get install fakeroot cdbs debhelper</pre>
+
+    <div class="block">
+    Now we can create the package.
+    </div>
+<pre>
+python setup.py clean
+fakeroot debian/rules binary</pre>
+
+    <div class="block">
+    Here's how to install the package.
+    </div>
+<pre>
+sudo dpkg -i ../python-cmdo_&lt;version&gt;_all.deb</pre>
+
+    <div class="block">
+    A deb package is created in the directory above.
+    </div>
+    <div class="block">
+    You may see the following ignorable error message.
+    </div>
+<pre>
+tar: -: file name read contains nul character</pre>
+
+  </span>
+  <span id="tocitem9">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">Debian uninstall</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+<pre>
+sudo dpkg -P python-cmdo</pre>
+
+  </span>
+  <span id="tocitem10">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">RPM install</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+<pre>
+python setup.py bdist_rpm</pre>
+
+    <div class="block">
+    This feature is broken in some versions of python distutils.
+    </div>
+  </span>
+
+</body>
+</html>

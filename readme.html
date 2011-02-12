@@ -1,0 +1,555 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+
+<title>Cmdo help readme</title>
+
+<style type="text/css">
+* {
+    font-size: 12pt;
+}
+
+.h1bar {
+    background-color: #aaaaff;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    padding: 4px;
+    width: 100%;
+    height: auto;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.h1barheading {
+    font-size: 16pt;
+    font-weight: bold;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 4px;
+}
+
+.h1bartopcell {
+    text-align: right;
+}
+
+.h1bartoplink {
+    font-size: 11pt;
+    text-indent: 1em;
+    padding: 2px;
+}
+
+.h2bar {
+    background-color: #e8e8ff;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    padding: 2px;
+    width: 100%;
+    height: auto;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.h2barheading {
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 2px;
+}
+
+.h2bartopcell {
+    text-align: right;
+}
+
+.h2bartoplink {
+    font-size: 11pt;
+    text-indent: 1em;
+    padding: 2px;
+}
+
+.heading1 {
+    background-color: #aaaaff;
+    font-size: 16pt;
+    font-weight: bold;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 4px;
+}
+
+.heading2 {
+    background-color: #e8e8ff;
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 2px;
+}
+
+.heading3 {
+    border-bottom: 1px solid gray;
+    width: auto;
+    font-size: 13pt;
+    font-weight: bold;
+    margin-top: 24px;
+    margin-bottom: 12px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0;
+}
+
+.heading4 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0;
+}
+
+.heading5 {
+    font-size: 12pt;
+    font-weight: italic;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0;
+}
+
+.heading6 {
+    font-size: 11pt;
+    font-weight: italic;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0;
+}
+
+.gentable {
+    border: 1px solid gray;
+    margin-bottom: 8px;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.genheader {
+    border: 1px solid gray;
+    background-color: #F2F2FF;
+    padding: 2px 4px;
+}
+
+.genrow {
+}
+
+.gencell {
+    border: 1px solid gray;
+    padding: 2px 4px;
+}
+
+ol {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: -8px;
+    margin-right: 0px;
+}
+
+ol li {
+    list-style-type: decimal;
+}
+
+ul li {
+}
+
+p {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0;
+}
+
+pre {
+    background-color: #eeeeee;
+    font-size: 10pt;
+}
+
+.tocblock {
+    border: 1px solid gray;
+    background-color: #eeeeff;
+    padding: 10px;
+    margin: 20px;
+}
+
+.toc0 {
+}
+
+.toc1 {
+    padding-top: 10px;
+    font-weight: bold;
+}
+
+.toc2 {
+    padding-left: 16px;
+}
+
+.toc3 {
+    padding-left: 32px;
+}
+
+.toc4 {
+    padding-left: 48px;
+}
+
+.block {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+</style>
+
+<style type="text/css" media="print">
+.h1bartoplink {
+    display: none;
+}
+
+.h2bartoplink {
+    display: none;
+}
+
+.tocblock {
+    display: none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1 class="heading1">Cmdo</h1>
+  <div id="toc" class="tocblock">
+    <div class="toc1"><a href=#tocitem1>Introduction</a></div>
+    <div class="toc1"><a href=#tocitem2>What's in it for Developers?</a></div>
+      <div class="toc2"><a href=#tocitem3>What's in it for the Author?</a></div>
+      <div class="toc2"><a href=#tocitem4>Feedback (Please...)</a></div>
+    <div class="toc1"><a href=#tocitem5>Features</a></div>
+    <div class="toc1"><a href=#tocitem6>Future Goals</a></div>
+    <div class="toc1"><a href=#tocitem7>Other Ideas</a></div>
+    <div class="toc1"><a href=#tocitem8>Dependencies</a></div>
+    <div class="toc1"><a href=#tocitem9>General Usage</a></div>
+      <div class="toc2"><a href=#tocitem10>Simplified Syntax</a></div>
+      <div class="toc2"><a href=#tocitem11>Full Python Syntax</a></div>
+      <div class="toc2"><a href=#tocitem12>Getting Help</a></div>
+  </div>
+  <table class="gentable">
+    <tr>
+      <td class="gencell">
+      Author
+      </td>
+      <td class="gencell">
+      Steve Cooper&lt;steve@wijjo.com&gt;
+      </td>
+    </tr>
+    <tr>
+      <td class="gencell">
+      URL
+      </td>
+      <td class="gencell">
+      http://wijjo.com/cmdo/
+      </td>
+    </tr>
+  </table>
+  <span id="tocitem1">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">Introduction</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+    <div class="block">
+    Cmdo (pronounced "commando") is a tool that makes it easier to build other
+    tools. It selectively exposes Python modules and functions as a complete
+    command line interface. Specifically, Cmdo finds modules in standard
+    locations, interprets command line arguments, invokes functions, imports
+    modules on demand, and supplies help. It also manages documentation
+    resources containing structured text.
+    </div>
+    <div class="block">
+    The current version only has built-in support for command line interfaces.
+    Function writers are free to implement graphical interfaces. Future Cmdo
+    releases may provide more help in this area. Since the engine understands a
+    great deal about the the data handled by exported functions it could
+    generate code for simple GUIs.
+    </div>
+    <div class="block">
+    See "INSTALL" or "install.html" for installation instructions.
+    </div>
+    <div class="block">
+    See "DEVELOPMENT" or "development.html" for guidance on building your own
+    applications.
+    </div>
+  </span>
+  <span id="tocitem2">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">What's in it for Developers?</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+    <ul>
+      <li>
+      Maximizes the ability of Python programmers to focus on application logic.
+      </li>
+      <li>
+      Minimizes the extra work needed for user interfaces and documentation.
+      </li>
+    </ul>
+    <span id="tocitem3">
+    <h3 class="heading3">What's in it for the Author?</h3>
+      <div class="block">
+      I'm scratching an itch. The results are useful to me. Even if nobody else
+      uses it, Cmdo will remain an important component of my computing and
+      development environment.
+      </div>
+      <div class="block">
+      Cmdo is the start of an experimental application construction tool set and
+      philosophy. Similar to many other development tools, the ultimate goal is
+      to reduce or eliminate as many non-core development burdens as possible.
+      Minimizing the demands of interface construction, help system maintenance,
+      and documentation production allows greater focus on the real-world
+      problems demanding your software solution.
+      </div>
+      <div class="block">
+      I personally find this a fun and easy way to build tools. Nothing would
+      make me happier than to know I'm helping other people be more productive.
+      I eagerly await your feedback to help me craft the tool YOU want. Are the
+      notions useful, misguided, or do they need improvement? Thanks for at
+      least checking it out!
+      </div>
+    </span>
+    <span id="tocitem4">
+    <h3 class="heading3">Feedback (Please...)</h3>
+      <div class="block">
+      This is the first Cmdo release. It is used every day, but by a very
+      limited number of people. So I rely on your feedback to help improve
+      quality and functionality.
+      </div>
+      <div class="block">
+      So please report problems (with as many details as you can provide), but
+      also voice what would make this software more useful to you. Don't
+      hesitate to ask, even if you have ideas that seem unrelated to the current
+      feature set.
+      </div>
+    </span>
+  </span>
+  <span id="tocitem5">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">Features</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+    <ul>
+      <li>
+      Dual command line user interface with simple or full Python syntax.
+      </li>
+      <li>
+      Uses standard Python, version 2.4 or better.
+      </li>
+      <li>
+      Python decorators support function discovery and argument type safety.
+      </li>
+      <li>
+      Customizable type classes control argument validation, conversion, and can
+      even provide user interfaces for missing information.
+      </li>
+      <li>
+      Modules are discovered by path and loaded on demand, without explicit
+      imports.
+      </li>
+      <li>
+      Modules can reference each other without importing, and referenced modules
+      are only loaded as needed.
+      </li>
+      <li>
+      Full command line help facility.
+      </li>
+      <li>
+      Raw documentation format is structured text, similar to wiki text.
+      </li>
+      <li>
+      Documentation is stored in Python doc strings accompanying exported
+      functions and in separate documentation modules.
+      </li>
+      <li>
+      Help can be published in text, HTML, XML, or custom formats.
+      </li>
+      <li>
+      Published documentation can be viewed using mime type assignments.
+      </li>
+      <li>
+      Optional interactive text-based user interface for commands.
+      </li>
+    </ul>
+  </span>
+  <span id="tocitem6">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">Future Goals</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+    <ul>
+      <li>
+      Graphical and web user interfaces for commands.
+      </li>
+      <li>
+      Spawn a daemon process communicating through one or more inter-process
+      communication standards, like DBUS, SOAP, etc.
+      </li>
+      <li>
+      Support a built-in web server for status and interaction.
+      </li>
+      <li>
+      Application/module repository.
+      </li>
+      <li>
+      Application generator.
+      </li>
+      <li>
+      Better support for complex argument types, such as lists.
+      </li>
+      <li>
+      Better examples.
+      </li>
+      <li>
+      Better developer documentation.
+      </li>
+      <li>
+      Module pre-compilation.
+      </li>
+    </ul>
+  </span>
+  <span id="tocitem7">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">Other Ideas</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+    <ul>
+      <li>
+      Multiple versions and implementations of the same module. For example, a
+      dialog module could have GTK, QT and curses implementations chosen based
+      on hints. A module working with file formats could have implementations
+      for each format generation. Hints allow other modules to individually
+      choose format versions for their files.
+      </li>
+      <li>
+      Your ideas go here!!
+      </li>
+    </ul>
+  </span>
+  <span id="tocitem8">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">Dependencies</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+    <table class="gentable">
+      <tr class="genrow">
+        <th class="genheader">Name/Link</th>
+        <th class="genheader">Description</th>
+      </tr>
+      <tr>
+        <td class="gencell">
+          <a href="http://www.python.org/">Python</a>
+        </td>
+        <td class="gencell">
+        Python interpreter version 2.4 or newer and standard module library
+        </td>
+      </tr>
+    </table>
+  </span>
+  <span id="tocitem9">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">General Usage</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+    <div class="block">
+    Cmdo supports two distinct syntax alternatives, a simplified command line
+    syntax allowing one command per command line, and full Python syntax with
+    each argument as a complete command.
+    </div>
+    <div class="block">
+    Since Cmdo is a development tool, the following examples use a fictional
+    cmdo-based application called "fido". Think of Fido as a general fetcher of
+    stuff, with "newspaper", "lottery", "weather", and "tv" modules.
+    </div>
+    <span id="tocitem10">
+    <h3 class="heading3">Simplified Syntax</h3>
+      <div class="block">
+      Simplified syntax allows one command per command line. The first argument
+      is a function name. The remaining arguments are passed to the function
+      call. For example, to have "fido" fetch newspaper #3 from yesterday...
+      </div>
+<pre>
+fido newspaper.fetch 3 yesterday</pre>
+
+    </span>
+    <span id="tocitem11">
+    <h3 class="heading3">Full Python Syntax</h3>
+      <div class="block">
+      Full Python syntax accepts anything Python can handle on a single line,
+      including nested calls, conditionals, etc. Each argument is a full
+      command. The "-e" option is not generally needed, since the engine
+      recognizes more complex syntax by looking for imbedded blanks or certain
+      punctuation. If used, "-e" must precede the first command.
+      </div>
+      <div class="block">
+      For example, to fetch both yesterday's newspaper #3 and tomorrow's
+      Washingon lottery results (smart dog, eh?)...
+      </div>
+<pre>
+fido -e 'newspaper.fetch(3, "yesterday")' 'lottery.download("WA", "tomorrow")'</pre>
+
+      <div class="block">
+      Note that strings are now quoted, arguments are comma-separated, and
+      within the parentheses of a function call. Single quotes around each
+      command prevent shell interpretation of parentheses and other special
+      characters.
+      </div>
+      <div class="block">
+      The next example shows slightly more complex Python code with conditional
+      logic, because we want to restrict television watching to rainy days.
+      </div>
+<pre>
+fido 'if weather.israiny(): tv.guide("now")'</pre>
+
+      <div class="block">
+      The two examples above are only possible using full Python syntax. In the
+      first case, it's the only way to have two commands on the same command
+      line. The conditional statement in the second example wouldn't be
+      possible, because simplified syntax is limited to just the function call
+      and its arguments.
+      </div>
+    </span>
+    <span id="tocitem12">
+    <h3 class="heading3">Getting Help</h3>
+      <div class="block">
+      To list available functions:
+      </div>
+<pre>
+fido help</pre>
+
+      <div class="block">
+      To see available options and parameters for the help command:
+      </div>
+<pre>
+fido help help</pre>
+
+      <div class="block">
+      To get help for a particular function:
+      </div>
+<pre>
+fido help newspaper.fetch</pre>
+
+      <div class="block">
+      To save the reference guide for all modules and functions in HTML format:
+      </div>
+<pre>
+fido help reference format=html output=reference.html</pre>
+
+      <div class="block">
+      To display the reference guide in a web browser:
+      </div>
+<pre>
+fido help reference format=html view=yes</pre>
+
+    </span>
+  </span>
+
+</body>
+</html>

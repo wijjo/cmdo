@@ -1,0 +1,283 @@
+#!/usr/bin/env python
+
+import sys
+import os.path
+dirRoot = os.path.split(os.path.split(os.path.abspath(sys.argv[0]))[0])[0]
+dirMod  = os.path.join(dirRoot, 'cmdo')
+sys.path.insert(0, dirMod)
+import structext
+#structext.debug = True
+
+class Node(object):
+    def __init__(self, *args, **kwargs):
+        self.sub = list(args)
+        self.kwargs = kwargs
+    def add(self, node):
+        self.sub.append(node)
+
+def Section(heading, *nodes):   return Node(heading = heading, toc = True, *nodes)
+def Text(text):                 return Node(text = text)
+def Plaintext(*nodes, **props): return Node(form = 'plaintext', *nodes, **props)
+def List(style, *items):        return Node(form = 'list', style = style, *items)
+def Item(*nodes, **props):      return Node(form = 'item', *nodes, **props)
+def Table(headers, *rows):      return Node(form = 'table', headers = headers, *rows)
+def Row(*cells):                return Node(form = 'row', *cells)
+def Cell(*nodes, **props):      return Node(form = 'cell', *nodes, **props)
+def Block(*nodes, **props):     return Node(form = 'block', *nodes, **props)
+def Link(label, url):           return Node(form = 'link', text = label, url = url)
+
+#===============================================================================
+# Test data
+#===============================================================================
+
+tests = [
+
+#=== Test 1
+[
+'Text',
+'''
+Hello
+''',
+Block(text = 'Hello')
+],
+
+#=== Test 2
+[
+'Lists',
+'''
+! Section 1
+Section 1 text
+# abc
+#   def
+##     ghi
+La la la
+*** jkl
+***mno
+**** pqr
+**** stu
+Wo wo wo
+* vwx
+* yz
+''',
+Section('Section 1',
+    Block(text = 'Section 1 text'),
+    List('number',
+        Item(text = 'abc'),
+        Item(text = 'def'),
+        Item(
+            List('number',
+                Item(text = 'ghi')
+            ),
+        ),
+    ),
+    Block(text= 'La la la'),
+    List('bullet',
+        Item(
+            List('bullet',
+                Item(
+                    List('bullet',
+                        Item(text = 'jkl'),
+                        Item(text = 'mno'),
+                        Item(
+                            List('bullet',
+                                Item(text = 'pqr'),
+                                Item(text = 'stu'),
+                            ),
+                        ),
+                    )
+                )
+            )
+        ),
+    ),
+    Block(text = 'Wo wo wo'),
+    List('bullet',
+        Item(text = 'vwx'),
+        Item(text = 'yz'),
+    ),
+),
+],
+
+[
+'Tables',
+'''
+|!head1|!head2|head3|
+|cell1-1||cell1-3|
+||cell2-2
+|||cell3-3|
+''',
+Table(['head1', 'head2', 'head3'],
+    Row(Cell(text = 'cell1-1'), Cell(), Cell(text = 'cell1-3')),
+    Row(Cell(), Cell(text = 'cell2-2')),
+    Row(Cell(), Cell(), Cell(text = 'cell3-3')),
+),
+],
+
+[
+'Plaintext',
+"""!
+Align window to position # 1-9 (shown below) without resizing.  Left, center or
+right alignments apply to the left edge, center or right edge of the window.
+Top, middle or bottom alignments apply to the top edge, middle or bottom edge
+of the window.  Defaults to active window.
+'''
+
+1-----+--2--+-----3
+|     |     |     |
++-----+-----+-----+
+4     |  5  |     6
++-----+-----+-----+
+|     |     |     |
+7-----+--8--+-----9
+
+'''
+""",
+Block(text = '''\
+Align window to position # 1-9 (shown below) without resizing.  Left, center or \
+right alignments apply to the left edge, center or right edge of the window. \
+Top, middle or bottom alignments apply to the top edge, middle or bottom edge \
+of the window.  Defaults to active window.'''),
+Plaintext(
+    text = '''\
+1-----+--2--+-----3
+|     |     |     |
++-----+-----+-----+
+4     |  5  |     6
++-----+-----+-----+
+|     |     |     |
+7-----+--8--+-----9''',
+),
+],
+
+[
+'Links',
+'''
+[[Python=http://www.python.org/]]
+[[http://www.python.org/]]
+''',
+Block(
+    Link('Python', 'http://www.python.org/'),
+    Link('http://www.python.org/', 'http://www.python.org/'),
+),
+],
+
+[
+'Macros',
+"""
+{{{
+print '''\
+Hello!\
+'''
+x = 3
+}}}
+{{x*4}} {{5+6}}
+{{blah}}{{foo}}
+{{blah+foo}}
+"{{'[[link]]'}}" blah [[link]]
+""",
+Block(
+    Text('''\
+12 11 BLAHFOO BLAHFOO "[[link]]" blah '''),
+    Link('link', 'link'),
+),
+],
+
+]   # End of tests
+
+syms = {'blah': 'BLAH', 'foo': 'FOO'}
+
+#===============================================================================
+
+def dumpDifferences(n1, n2, level, show):
+    nDifferences = 0
+    if n1 is None:
+        d1 = {}
+    else:
+        d1 = n1.kwargs
+    if n2 is None:
+        d2 = {}
+    else:
+        d2 = n2.kwargs
+    keys = d1.keys()
+    keys += [k2 for k2 in d2.keys() if k2 not in keys]
+    keys.sort()
+    if show: sOut = '{'
+    for key in keys:
+        if key != keys[0]:
+            if show: sOut += ', '
+        if key in d1:
+            v1 = '"%s"' % d1[key]
+        else:
+            v1 = None
+        if key in d2:
+            v2 = '"%s"' % d2[key]
+        else:
+            v2 = None
+        if v1 == v2:
+            if show: sOut += '%s=%s' % (key, v1)
+        else:
+            nDifferences += 1
+            if show: sOut += '%s=%s|%s' % (key, v1, v2)
+    if show: sOut += '} '
+    if n1 is None:
+        if show: print '%s%s * missing *' % ('x ' * level, sOut)
+        nDifferences = 1    # Convert from attribute to node differences count
+        for sub in n2.sub:
+            nDifferences += dumpDifferences(None, sub, level + 1, show)
+    elif n2 is None:
+        if show: print '%s%s * extra *' % ('x ' * level, sOut)
+        nDifferences = 1    # Convert from attribute to node differences count
+        for sub in n1.sub:
+            nDifferences += dumpDifferences(sub, None, level + 1, show)
+    else:
+        if nDifferences > 0:
+            if show: print '%s%s * %d differences *' % ('x ' * level, sOut, nDifferences)
+            nDifferences = 1    # Convert from attribute to node differences count
+        else:
+            if show: print '%s%s OK' % ('  ' * level, sOut)
+        for i in range(max(len(n1.sub), len(n2.sub))):
+            if i < len(n1.sub) and i < len(n2.sub):
+                nDifferences += dumpDifferences(n1.sub[i], n2.sub[i], level + 1, show)
+            elif i < len(n1.sub):
+                nDifferences += dumpDifferences(n1.sub[i], None, level + 1, show)
+            else:
+                nDifferences += dumpDifferences(None, n2.sub[i], level + 1, show)
+    return nDifferences
+
+class Factory(object):
+    def __call__(self, **kwargs):
+        return Node(**kwargs)
+
+parser = structext.Parser(Factory(), syms)
+i = 0
+passed = []
+failed = []
+#tests = tests[0:5]
+for test in tests:
+    name   = test[0]
+    text   = test[1]
+    result = test[2:]
+    i += 1
+    print '\n===== test %d (%s)' % (i, name)
+    if structext.debug: print '----- parse -----'
+    parser.parse(text)
+    node = parser.take()
+    nDifferences = dumpDifferences(node, Node(*result), 0, False)
+    if nDifferences > 0:
+        print '----- input -----'
+        for line in text.split('\n'):
+            if line:
+                print line.strip()
+        print '---- output -----'
+        dumpDifferences(node, Node(*result), 0, True)
+        print '---- summary ----'
+    if nDifferences == 0:
+        print 'PASS'
+        passed.append((i, name))
+    else:
+        print 'FAIL (%d nodes different)' % nDifferences
+        failed.append((i, name))
+print '\n===== Test Results'
+print 'Passed: (%d) %s' % (len(passed), ', '.join(['%d:%s' % item for item in passed]))
+print 'Failed: (%d) %s' % (len(failed), ', '.join(['%d:%s' % item for item in failed]))
+print ''
+sys.exit(len(failed))

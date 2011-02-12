@@ -1,0 +1,664 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+
+<title>Cmdo help reference</title>
+
+<style type="text/css">
+* {
+    font-size: 12pt;
+}
+
+.h1bar {
+    background-color: #aaaaff;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    padding: 4px;
+    width: 100%;
+    height: auto;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.h1barheading {
+    font-size: 16pt;
+    font-weight: bold;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 4px;
+}
+
+.h1bartopcell {
+    text-align: right;
+}
+
+.h1bartoplink {
+    font-size: 11pt;
+    text-indent: 1em;
+    padding: 2px;
+}
+
+.h2bar {
+    background-color: #e8e8ff;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    padding: 2px;
+    width: 100%;
+    height: auto;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.h2barheading {
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 2px;
+}
+
+.h2bartopcell {
+    text-align: right;
+}
+
+.h2bartoplink {
+    font-size: 11pt;
+    text-indent: 1em;
+    padding: 2px;
+}
+
+.heading1 {
+    background-color: #aaaaff;
+    font-size: 16pt;
+    font-weight: bold;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 4px;
+}
+
+.heading2 {
+    background-color: #e8e8ff;
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 2px;
+}
+
+.heading3 {
+    border-bottom: 1px solid gray;
+    width: auto;
+    font-size: 13pt;
+    font-weight: bold;
+    margin-top: 24px;
+    margin-bottom: 12px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0;
+}
+
+.heading4 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0;
+}
+
+.heading5 {
+    font-size: 12pt;
+    font-weight: italic;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0;
+}
+
+.heading6 {
+    font-size: 11pt;
+    font-weight: italic;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0;
+}
+
+.gentable {
+    border: 1px solid gray;
+    margin-bottom: 8px;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.genheader {
+    border: 1px solid gray;
+    background-color: #F2F2FF;
+    padding: 2px 4px;
+}
+
+.genrow {
+}
+
+.gencell {
+    border: 1px solid gray;
+    padding: 2px 4px;
+}
+
+ol {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: -8px;
+    margin-right: 0px;
+}
+
+ol li {
+    list-style-type: decimal;
+}
+
+ul li {
+}
+
+p {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0;
+}
+
+pre {
+    background-color: #eeeeee;
+    font-size: 10pt;
+}
+
+.tocblock {
+    border: 1px solid gray;
+    background-color: #eeeeff;
+    padding: 10px;
+    margin: 20px;
+}
+
+.toc0 {
+}
+
+.toc1 {
+    padding-top: 10px;
+    font-weight: bold;
+}
+
+.toc2 {
+    padding-left: 16px;
+}
+
+.toc3 {
+    padding-left: 32px;
+}
+
+.toc4 {
+    padding-left: 48px;
+}
+
+.block {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+</style>
+
+<style type="text/css" media="print">
+.h1bartoplink {
+    display: none;
+}
+
+.h2bartoplink {
+    display: none;
+}
+
+.tocblock {
+    display: none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1 class="heading1">Cmdo help reference</h1>
+<div class="block">
+  <div id="toc" class="tocblock">
+    <div class="toc1"><a href=#tocitem1>Function: help(namesFind, orderBy=?, format=?, input=?, output=?, view=?, heading=?, plain=?, text=?, title=?, tocStart=?, tocStop=?, style=?)</a></div>
+    <div class="toc1"><a href=#tocitem2>Function: prompt(func, gui=?)</a></div>
+    <div class="toc1"><a href=#tocitem3>Function: publish(input, format=?, output=?, view=?, tocStart=?, tocStop=?, style=?)</a></div>
+    <div class="toc1"><a href=#tocitem4>Function: version()</a></div>
+    <div class="toc1"><a href=#tocitem5>CMDO Namespace</a></div>
+      <div class="toc2"><a href=#tocitem6>CMDO Core Classes</a></div>
+      <div class="toc2"><a href=#tocitem7>CMDO Core Functions</a></div>
+      <div class="toc2"><a href=#tocitem8>CMDO Core Variables</a></div>
+      <div class="toc2"><a href=#tocitem9>CMDO Exported Types</a></div>
+  </div>
+  <h2 class="heading2">Module: (core)</h2>
+    <span id="tocitem1">
+    <h3 class="heading3">Function: help(namesFind, orderBy=?, format=?, input=?, output=?, view=?, heading=?, plain=?, text=?, title=?, tocStart=?, tocStop=?, style=?)</h3>
+          <div class="block">
+          Publish text or other format documentation selected by property
+          name(s) to screen or file. Optionally load into viewer based on
+          mailcap application assignments for document type.
+          </div>
+        <h4 class="heading4">Ordered Arguments</h4>
+          <table class="gentable">
+            <tr class="genrow">
+              <th class="genheader">Label</th>
+              <th class="genheader">Description</th>
+            </tr>
+            <tr>
+              <td class="gencell">
+              namesFind
+              </td>
+              <td class="gencell">
+              help names (default=[]) [o]
+              </td>
+            </tr>
+          </table>
+          <div class="block">
+          [o]=optional
+          </div>
+        <h4 class="heading4">Keyword Arguments (Optional)</h4>
+          <table class="gentable">
+            <tr class="genrow">
+              <th class="genheader">Keyword</th>
+              <th class="genheader">Description</th>
+            </tr>
+            <tr>
+              <td class="gencell">
+              format
+              </td>
+              <td class="gencell">
+              publication format (text*|html|xml) (default=text)
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              heading
+              </td>
+              <td class="gencell">
+              top level heading text
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              input
+              </td>
+              <td class="gencell">
+              input path
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              orderBy
+              </td>
+              <td class="gencell">
+              order by names
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              output
+              </td>
+              <td class="gencell">
+              output path (default=stdout)
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              plain
+              </td>
+              <td class="gencell">
+              disable heading wrapper
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              style
+              </td>
+              <td class="gencell">
+              page style (medium*|small) (default=medium)
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              text
+              </td>
+              <td class="gencell">
+              structured text
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              title
+              </td>
+              <td class="gencell">
+              page title
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              tocStart
+              </td>
+              <td class="gencell">
+              table of contents start level (default=0)
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              tocStop
+              </td>
+              <td class="gencell">
+              table of contents stop level (default=2)
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              view
+              </td>
+              <td class="gencell">
+              open in mime type viewer (default=False)
+              </td>
+            </tr>
+          </table>
+    </span>
+    <span id="tocitem2">
+    <h3 class="heading3">Function: prompt(func, gui=?)</h3>
+          <div class="block">
+          Provide simple prompted GUI for function call.
+          </div>
+        <h4 class="heading4">Ordered Arguments</h4>
+          <table class="gentable">
+            <tr class="genrow">
+              <th class="genheader">Label</th>
+              <th class="genheader">Description</th>
+            </tr>
+            <tr>
+              <td class="gencell">
+              func
+              </td>
+              <td class="gencell">
+              function name or reference
+              </td>
+            </tr>
+          </table>
+        <h4 class="heading4">Keyword Arguments (Optional)</h4>
+          <table class="gentable">
+            <tr class="genrow">
+              <th class="genheader">Keyword</th>
+              <th class="genheader">Description</th>
+            </tr>
+            <tr>
+              <td class="gencell">
+              gui
+              </td>
+              <td class="gencell">
+              GUI driver (text*) (default=text)
+              </td>
+            </tr>
+          </table>
+    </span>
+    <span id="tocitem3">
+    <h3 class="heading3">Function: publish(input, format=?, output=?, view=?, tocStart=?, tocStop=?, style=?)</h3>
+          <div class="block">
+          Publish structured text in specified or default format to screen or
+          file. Optionally load into viewer based on mailcap application
+          assignments for document type.
+          </div>
+        <h4 class="heading4">Ordered Arguments</h4>
+          <table class="gentable">
+            <tr class="genrow">
+              <th class="genheader">Label</th>
+              <th class="genheader">Description</th>
+            </tr>
+            <tr>
+              <td class="gencell">
+              input
+              </td>
+              <td class="gencell">
+              input path
+              </td>
+            </tr>
+          </table>
+        <h4 class="heading4">Keyword Arguments (Optional)</h4>
+          <table class="gentable">
+            <tr class="genrow">
+              <th class="genheader">Keyword</th>
+              <th class="genheader">Description</th>
+            </tr>
+            <tr>
+              <td class="gencell">
+              format
+              </td>
+              <td class="gencell">
+              publication format (text*|html|xml) (default=text)
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              output
+              </td>
+              <td class="gencell">
+              output path (default=stdout)
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              style
+              </td>
+              <td class="gencell">
+              page style (medium*|small) (default=medium)
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              tocStart
+              </td>
+              <td class="gencell">
+              table of contents start level (default=0)
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              tocStop
+              </td>
+              <td class="gencell">
+              table of contents stop level (default=2)
+              </td>
+            </tr>
+            <tr>
+              <td class="gencell">
+              view
+              </td>
+              <td class="gencell">
+              open in mime type viewer (default=False)
+              </td>
+            </tr>
+          </table>
+    </span>
+    <span id="tocitem4">
+    <h3 class="heading3">Function: version()</h3>
+    </span>
+  <span id="tocitem5">
+  <table class="h2bar"><tr><td><h2 class="h2barheading">CMDO Namespace</h2></td><td class="h2bartopcell"><a href="#toc" class="h2bartoplink">Top</a></td></tr></table>
+    <span id="tocitem6">
+    <h3 class="heading3">CMDO Core Classes</h3>
+      <h4 class="heading4">CMDO.ExcArgument</h4>
+        Argument processing exception
+      <h4 class="heading4">CMDO.ExcBase</h4>
+        Base exception class
+      <h4 class="heading4">CMDO.ExcConversion</h4>
+        Argument conversion exception
+      <h4 class="heading4">CMDO.ExcDoc</h4>
+        Documentation exception
+      <h4 class="heading4">CMDO.ExcFunction</h4>
+        Exported function exception
+      <h4 class="heading4">CMDO.ExcLoad</h4>
+        Load-time exception
+      <h4 class="heading4">CMDO.ExcPath</h4>
+        File or directory exception
+      <h4 class="heading4">CMDO.ExcQuit</h4>
+        Application termination exception
+      <h4 class="heading4">CMDO.ExportedClass</h4>
+        Base class for classes exported from module files
+      <h4 class="heading4">CMDO.More</h4>
+        Special type for accepting a variable quantity of additional arguments.
+        Optional arguments specify a validation type ("type"), a minimum
+        quantity ("countMin"), a maximum quantity ("countMax"), and a
+        description ("desc").
+      <h4 class="heading4">CMDO.TypeBase</h4>
+        Base argument type class
+    </span>
+    <span id="tocitem7">
+    <h3 class="heading3">CMDO Core Functions</h3>
+      <h4 class="heading4">CMDO.abort(*msgs)</h4>
+        Display error message(s) and quit (violently)
+      <h4 class="heading4">CMDO.block(label, indent, border, *msgs)</h4>
+        Display message(s) with label, border and indentation.
+      <h4 class="heading4">CMDO.config(name, caseSensitive = False)</h4>
+        Returns a configuration object for accessing a configuration file in the
+        application home directory.
+      <h4 class="heading4">CMDO.confirm(*msgs)</h4>
+        Display message(s) and return True if user said "yes".
+      <h4 class="heading4">CMDO.docParse(path)</h4>
+        Parses structured text documentation in a file and returns the root
+        node.
+      <h4 class="heading4">CMDO.docParseString(s)</h4>
+        Parses structured text documentation in a string and returns the root
+        node.
+      <h4 class="heading4">CMDO.error(*msgs)</h4>
+        Display error message(s)
+      <h4 class="heading4">CMDO.execute(s)</h4>
+        Executes a string as one or more commands by using smart command parsing
+        to detect and handle simplified syntax, if used.
+      <h4 class="heading4">CMDO.findProgram(*names)</h4>
+        Returns first occurance of program name(s) in the system path.
+      <h4 class="heading4">CMDO.getFunction(s)</h4>
+        Converts function name to Function object.
+      <h4 class="heading4">CMDO.getVersionedPath(path, suffix)</h4>
+        Convert path to versioned path by adding suffix and counter when
+        necessary.
+      <h4 class="heading4">CMDO.glob(pathname)</h4>
+        Return a list of paths matching a pathname pattern. The pattern may
+        contain simple shell-style wildcards a la fnmatch.
+      <h4 class="heading4">CMDO.info(*msgs)</h4>
+        Display message(s)
+      <h4 class="heading4">CMDO.isString(o)</h4>
+        Returns True if the argument is a string type.
+      <h4 class="heading4">CMDO.message(label, indent, *msgs)</h4>
+        Display message(s) with label and indentation.
+      <h4 class="heading4">CMDO.prompt(pmsg, isvalid = None, fixer = None, msgs = [])</h4>
+        Display message(s) and request response.
+      <h4 class="heading4">CMDO.purgeVersions(path, suffix, nKeep, reverse = False)</h4>
+        Purge file versions created by getVersionedPath. Purge specified
+        quantity in normal or reverse sequence.
+      <h4 class="heading4">CMDO.quit(*msgs)</h4>
+        Display message(s) and quit (normally)
+      <h4 class="heading4">CMDO.registerGUI(name, cls)</h4>
+        Register GUI name and class.
+      <h4 class="heading4">CMDO.registerPublisher(name, cls)</h4>
+        Register documentation publisher name and class.
+      <h4 class="heading4">CMDO.sortedIter(seq)</h4>
+        Iterates sequence object in alphabetical order.
+      <h4 class="heading4">CMDO.spawn(command)</h4>
+        Spawns a command process. Returns the process ID (PID).
+      <h4 class="heading4">CMDO.textFormatPlain(text, indent, width = 0)</h4>
+        Returns lines split by linefeeds, indented and wrapped to an optional
+        width. Arguments are (text, indent and width (defaults to 0).
+      <h4 class="heading4">CMDO.textFormatWrapped(text, indent, prefix, width)</h4>
+        Returns word-wrapped text lines using indentation, a line prefix, and a
+        maximum width. Arguments are (text, indent, prefix, width).
+      <h4 class="heading4">CMDO.warning(*msgs)</h4>
+        Display warning message(s)
+    </span>
+    <span id="tocitem8">
+    <h3 class="heading3">CMDO Core Variables</h3>
+      <h4 class="heading4">CMDO.debug</h4>
+        Display debugging messages if True
+      <h4 class="heading4">CMDO.engine</h4>
+        Engine object
+      <h4 class="heading4">CMDO.extConfig</h4>
+        Configuration file extension, including leading "."
+      <h4 class="heading4">CMDO.extCore</h4>
+        Core module file extension, including leading "."
+      <h4 class="heading4">CMDO.extDoc</h4>
+        Documentation module file extension, including leading "."
+      <h4 class="heading4">CMDO.extModule</h4>
+        Module file extension, including leading "."
+      <h4 class="heading4">CMDO.guis</h4>
+        Dictionary of available GUIs
+      <h4 class="heading4">CMDO.maxTracebackLines</h4>
+        (undocumented int)
+      <h4 class="heading4">CMDO.maxWidth</h4>
+        (undocumented int)
+      <h4 class="heading4">CMDO.maxint</h4>
+        (undocumented int)
+      <h4 class="heading4">CMDO.program</h4>
+        Application object
+      <h4 class="heading4">CMDO.publishers</h4>
+        Dictionary of available formats/publishers
+      <h4 class="heading4">CMDO.reKwarg</h4>
+        (undocumented SRE_Pattern)
+      <h4 class="heading4">CMDO.reNum</h4>
+        (undocumented SRE_Pattern)
+      <h4 class="heading4">CMDO.reSym</h4>
+        (undocumented SRE_Pattern)
+      <h4 class="heading4">CMDO.verbose</h4>
+        Display verbose messages if True
+    </span>
+    <span id="tocitem9">
+    <h3 class="heading3">CMDO Exported Types</h3>
+      <h4 class="heading4">CMDO.Boolean</h4>
+        A true/false value. Interprets (case-insensitive) "true"/"false",
+        "yes"/"no", and zero/non-zero.
+      <h4 class="heading4">CMDO.Command</h4>
+        An unchecked path string.
+      <h4 class="heading4">CMDO.Enum</h4>
+        Enumerated value from a list of possible values.
+      <h4 class="heading4">CMDO.Function</h4>
+        A named function.
+      <h4 class="heading4">CMDO.GUI</h4>
+        GUI driver.
+      <h4 class="heading4">CMDO.Integer</h4>
+        An integer number.
+      <h4 class="heading4">CMDO.Path</h4>
+        An unchecked path string.
+      <h4 class="heading4">CMDO.PathFile</h4>
+        A path to an existing file.
+      <h4 class="heading4">CMDO.Publisher</h4>
+        Publication format, e.g. "text", "html" or "xml".
+      <h4 class="heading4">CMDO.RegExp</h4>
+        A regular expression for searches.
+      <h4 class="heading4">CMDO.String</h4>
+        A text string.
+      <h4 class="heading4">CMDO.TagList</h4>
+        A comma-separated tag list.
+      <h4 class="heading4">CMDO.URL</h4>
+        An unchecked URL string.
+    </span>
+  </span>
+</div>
+
+</body>
+</html>

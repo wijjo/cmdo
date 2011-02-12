@@ -1,0 +1,105 @@
+
+
++===========================+
+| Installation Instructions |
++===========================+
+
+
+----------------
+ Direct Install 
+----------------
+
+Using script
+------------
+
+  ./install
+
+It will prompt for a sudo password as needed.
+
+Using setup.py
+--------------
+
+  sudo python setup.py install
+
+
+--------------
+ Getting Help 
+--------------
+
+  python setup.py --help
+  python setup.py --help-commands
+
+
+-----------
+ Uninstall 
+-----------
+
+  ./uninstall
+
+Read messages carefully before saying "yes" to proceed. It will prompt for a
+sudo password as needed.
+
+
+-----------------------
+ Create source tarball 
+-----------------------
+
+  python setup.py sdist
+
+A tarball is created in the dist subdirectory.
+
+
+-----------------------
+ Create binary tarball 
+-----------------------
+
+  python setup.py bdist
+
+A tarball is created in the dist subdirectory.
+
+
+----------------
+ Debian install 
+----------------
+
+These commands create the ".deb" package in the parent directory. If you
+downloaded a pre-build ".deb" package skip this step and just run the "dpkg-i"
+command that follows.
+
+This procedure for building the package requires requires fakeroot, cdbs, and
+debhelper. At least these are what's needed on Ubuntu Feisty Fawn. Here's how
+you can get the missing packages.
+
+  sudo apt-get install fakeroot cdbs debhelper
+
+Now we can create the package.
+
+  python setup.py clean
+  fakeroot debian/rules binary
+
+Here's how to install the package.
+
+  sudo dpkg -i ../python-cmdo_<version>_all.deb
+
+A deb package is created in the directory above.
+
+You may see the following ignorable error message.
+
+  tar: -: file name read contains nul character
+
+
+------------------
+ Debian uninstall 
+------------------
+
+  sudo dpkg -P python-cmdo
+
+
+-------------
+ RPM install 
+-------------
+
+  python setup.py bdist_rpm
+
+This feature is broken in some versions of python distutils.
+

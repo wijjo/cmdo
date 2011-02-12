@@ -1,0 +1,17 @@
+Source: python-cmdo
+Section: python
+Priority: optional
+Maintainer: Steve Cooper <steve@wijjo.com>
+Build-Depends: debhelper (>= 5), cdbs (>= 0.4.43), python-all-dev (>= 2.3.5-11)
+Build-Depends-Indep: python-support (>= 0.3)
+Standards-Version: 3.7.2
+
+Package: python-cmdo
+Architecture: all
+Depends: ${python:Depends}
+Provides: ${python:Provides}
+Description: Derive command line interfaces from decorated functions
+ Derive complete Python command line interfaces from plug-in modules with
+ decorated functions.  Generate multi-format help from decorators, doc strings
+ and other structured text.  Add commands by writing new decorated functions in
+ existing or new modules.

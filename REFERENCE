@@ -1,0 +1,379 @@
+
+
++=====================+
+| Cmdo help reference |
++=====================+
+
+
+----------------
+ Module: (core) 
+----------------
+
+Function: help(namesFind, orderBy=?, format=?, input=?, output=?, view=?, heading=?, plain=?, text=?, title=?, tocStart=?, tocStop=?, style=?)
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Publish text or other format documentation selected by property name(s) to
+screen or file. Optionally load into viewer based on mailcap application
+assignments for document type.
+
+= Ordered Arguments =
+
+- - - - - - - - - - - - - - - - - - - - - - 
+ -Label-    -Description-
+ namesFind  help names (default = []) [o]
+- - - - - - - - - - - - - - - - - - - - - - 
+
+[o]=optional
+
+= Keyword Arguments (Optional) =
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ -Keyword-  -Description-
+ format     publication format (text*|html|xml) (default = text)
+ heading    top level heading text
+ input      input path
+ orderBy    order by names
+ output     output path (default = stdout)
+ plain      disable heading wrapper
+ style      page style (medium*|small) (default = medium)
+ text       structured text
+ title      page title
+ tocStart   table of contents start level (default = 0)
+ tocStop    table of contents stop level (default = 2)
+ view       open in mime type viewer (default = False)
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Function: prompt(func, gui=?)
+-----------------------------
+
+Provide simple prompted GUI for function call.
+
+= Ordered Arguments =
+
+- - - - - - - - - - - - - - - - - - -
+ -Label-  -Description-
+ func     function name or reference
+- - - - - - - - - - - - - - - - - - -
+
+= Keyword Arguments (Optional) =
+
+- - - - - - - - - - - - - - - - - - - - - - - - - 
+ -Keyword-  -Description-
+ gui        GUI driver (text*) (default = text)
+- - - - - - - - - - - - - - - - - - - - - - - - - 
+
+Function: publish(input, format=?, output=?, view=?, tocStart=?, tocStop=?, style=?)
+------------------------------------------------------------------------------------
+
+Publish structured text in specified or default format to screen or file.
+Optionally load into viewer based on mailcap application assignments for
+document type.
+
+= Ordered Arguments =
+
+- - - - - - - - - - - - - 
+ -Label-  -Description-
+ input    input path
+- - - - - - - - - - - - - 
+
+= Keyword Arguments (Optional) =
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ -Keyword-  -Description-
+ format     publication format (text*|html|xml) (default = text)
+ output     output path (default = stdout)
+ style      page style (medium*|small) (default = medium)
+ tocStart   table of contents start level (default = 0)
+ tocStop    table of contents stop level (default = 2)
+ view       open in mime type viewer (default = False)
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Function: version()
+-------------------
+
+
+----------------
+ CMDO Namespace 
+----------------
+
+CMDO Core Classes
+-----------------
+
+= CMDO.ExcArgument =
+
+Argument processing exception
+
+= CMDO.ExcBase =
+
+Base exception class
+
+= CMDO.ExcConversion =
+
+Argument conversion exception
+
+= CMDO.ExcDoc =
+
+Documentation exception
+
+= CMDO.ExcFunction =
+
+Exported function exception
+
+= CMDO.ExcLoad =
+
+Load-time exception
+
+= CMDO.ExcPath =
+
+File or directory exception
+
+= CMDO.ExcQuit =
+
+Application termination exception
+
+= CMDO.ExportedClass =
+
+Base class for classes exported from module files
+
+= CMDO.More =
+
+Special type for accepting a variable quantity of additional arguments. Optional
+arguments specify a validation type ("type"), a minimum quantity ("countMin"), a
+maximum quantity ("countMax"), and a description ("desc").
+
+= CMDO.TypeBase =
+
+Base argument type class
+
+CMDO Core Functions
+-------------------
+
+= CMDO.abort(*msgs) =
+
+Display error message(s) and quit (violently)
+
+= CMDO.block(label, indent, border, *msgs) =
+
+Display message(s) with label, border and indentation.
+
+= CMDO.config(name, caseSensitive = False) =
+
+Returns a configuration object for accessing a configuration file in the
+application home directory.
+
+= CMDO.confirm(*msgs) =
+
+Display message(s) and return True if user said "yes".
+
+= CMDO.docParse(path) =
+
+Parses structured text documentation in a file and returns the root node.
+
+= CMDO.docParseString(s) =
+
+Parses structured text documentation in a string and returns the root node.
+
+= CMDO.error(*msgs) =
+
+Display error message(s)
+
+= CMDO.execute(s) =
+
+Executes a string as one or more commands by using smart command parsing to
+detect and handle simplified syntax, if used.
+
+= CMDO.findProgram(*names) =
+
+Returns first occurance of program name(s) in the system path.
+
+= CMDO.getFunction(s) =
+
+Converts function name to Function object.
+
+= CMDO.getVersionedPath(path, suffix) =
+
+Convert path to versioned path by adding suffix and counter when necessary.
+
+= CMDO.glob(pathname) =
+
+Return a list of paths matching a pathname pattern. The pattern may contain
+simple shell-style wildcards a la fnmatch.
+
+= CMDO.info(*msgs) =
+
+Display message(s)
+
+= CMDO.isString(o) =
+
+Returns True if the argument is a string type.
+
+= CMDO.message(label, indent, *msgs) =
+
+Display message(s) with label and indentation.
+
+= CMDO.prompt(pmsg, isvalid = None, fixer = None, msgs = []) =
+
+Display message(s) and request response.
+
+= CMDO.purgeVersions(path, suffix, nKeep, reverse = False) =
+
+Purge file versions created by getVersionedPath. Purge specified quantity in
+normal or reverse sequence.
+
+= CMDO.quit(*msgs) =
+
+Display message(s) and quit (normally)
+
+= CMDO.registerGUI(name, cls) =
+
+Register GUI name and class.
+
+= CMDO.registerPublisher(name, cls) =
+
+Register documentation publisher name and class.
+
+= CMDO.sortedIter(seq) =
+
+Iterates sequence object in alphabetical order.
+
+= CMDO.spawn(command) =
+
+Spawns a command process. Returns the process ID (PID).
+
+= CMDO.textFormatPlain(text, indent, width = 0) =
+
+Returns lines split by linefeeds, indented and wrapped to an optional width.
+Arguments are (text, indent and width (defaults to 0).
+
+= CMDO.textFormatWrapped(text, indent, prefix, width) =
+
+Returns word-wrapped text lines using indentation, a line prefix, and a maximum
+width. Arguments are (text, indent, prefix, width).
+
+= CMDO.warning(*msgs) =
+
+Display warning message(s)
+
+CMDO Core Variables
+-------------------
+
+= CMDO.debug =
+
+Display debugging messages if True
+
+= CMDO.engine =
+
+Engine object
+
+= CMDO.extConfig =
+
+Configuration file extension, including leading "."
+
+= CMDO.extCore =
+
+Core module file extension, including leading "."
+
+= CMDO.extDoc =
+
+Documentation module file extension, including leading "."
+
+= CMDO.extModule =
+
+Module file extension, including leading "."
+
+= CMDO.guis =
+
+Dictionary of available GUIs
+
+= CMDO.maxTracebackLines =
+
+(undocumented int)
+
+= CMDO.maxWidth =
+
+(undocumented int)
+
+= CMDO.maxint =
+
+(undocumented int)
+
+= CMDO.program =
+
+Application object
+
+= CMDO.publishers =
+
+Dictionary of available formats/publishers
+
+= CMDO.reKwarg =
+
+(undocumented SRE_Pattern)
+
+= CMDO.reNum =
+
+(undocumented SRE_Pattern)
+
+= CMDO.reSym =
+
+(undocumented SRE_Pattern)
+
+= CMDO.verbose =
+
+Display verbose messages if True
+
+CMDO Exported Types
+-------------------
+
+= CMDO.Boolean =
+
+A true/false value. Interprets (case-insensitive) "true"/"false", "yes"/"no",
+and zero/non-zero.
+
+= CMDO.Command =
+
+An unchecked path string.
+
+= CMDO.Enum =
+
+Enumerated value from a list of possible values.
+
+= CMDO.Function =
+
+A named function.
+
+= CMDO.GUI =
+
+GUI driver.
+
+= CMDO.Integer =
+
+An integer number.
+
+= CMDO.Path =
+
+An unchecked path string.
+
+= CMDO.PathFile =
+
+A path to an existing file.
+
+= CMDO.Publisher =
+
+Publication format, e.g. "text", "html" or "xml".
+
+= CMDO.RegExp =
+
+A regular expression for searches.
+
+= CMDO.String =
+
+A text string.
+
+= CMDO.TagList =
+
+A comma-separated tag list.
+
+= CMDO.URL =
+
+An unchecked URL string.
+

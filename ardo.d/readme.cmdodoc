@@ -1,0 +1,18 @@
+{{{
+nameProg = CMDO.program.name.capitalize()
+nameMod  = CMDO.engine.name.capitalize()
+subdir   = '.%s' % CMDO.program.name
+}}}
+
+!{{nameProg}} README
+
+{{nameProg}} is a useful {{nameMod}} sample program that manages backup
+archives in "{{subdir}}" subdirectories.  It can back up files or directories,
+optionally wrapping them in compressed archives.  It has functions for
+restoring and comparing archives to current files or directories.  Not all
+compare/restore functionality is working.
+
+Compressing with the "gzip" or "bzip2" functions will either display
+verbose progress or a running summary of megabytes transfered.  To get
+the summary you need to have [[pv=http://www.ivarch.com/programs/pv.shtml]]
+installed.

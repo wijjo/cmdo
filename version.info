@@ -1,0 +1,20 @@
+[info]
+program = cmdo
+package = python-cmdo
+version = 0.7
+ubuntu  = feisty
+urgency = low
+name    = Steve Cooper
+email   = steve@wijjo.com
+url     = http://wijjo.com/cmdo
+
+[changes]
+1 = Better file save versioning and backup
+2 = new-version script for easier version transitions
+3 =
+4 =
+5 =
+6 =
+7 =
+8 =
+9 =

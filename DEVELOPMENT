@@ -1,0 +1,576 @@
+
+
++======================+
+| Cmdo Developer Guide |
++======================+
+
+
+--------------
+ Introduction 
+--------------
+
+This guide is a work in progress. Until completed, the best resource remains the
+source code of working applications, including "ardo", a part of this
+distribution.
+
+
+-----------------------
+ Application Structure 
+-----------------------
+
+Executable
+----------
+
+Cmdo applications start with a single tiny Python script. The contents of this
+script will be almost identical for most applications, with the exception of the
+version number passed to cmdo.main(). The script name determines both the
+application's internal name and which directories get searched for modules and
+configuration files. An easy way to get started is to copy "/usr/bin/cmdo"
+(adjust for you local installation), and then rename and edit the copy to
+specify your application's version number.
+
+Modules
+-------
+
+Cmdo applications are structured as a set of Python modules identified by
+special extensions and placed in one or more well-known directories. Modules
+with appropriate extensions are loaded (only) as needed to fulfill function
+calls or documentation requests. Unlike native Python, you never have to
+explicitly import anything. All discovered modules will be loaded whenever they
+are needed.
+
+The following command displays the module search path for Cmdo.
+
+  cmdo 'print CMDO.program.dirsScript'
+
+The included Ardo sample application provides another example. These two
+commands displays its search path and the additional path for core Cmdo modules,
+e.g. for the "help" and "version" functions.
+
+  ardo 'print CMDO.program.dirsScript'
+  ardo 'print CMDO.engine.dirsScript'
+
+= ".cmdo" Modules =
+
+Modules with the ".cmdo" extension supply Python code to implement both external
+and internal functions (and classes). Decorators (discussed later) declare
+functions that are externally accessible, i.e. from the command line.
+
+Module syntax is pure Python. No pre-processing occurs. The only thing special
+about code modules is how they are discovered and automatically loaded, and the
+two special namespaces that are injected as global symbols. The two namespaces
+are "CMDO" and a similar capitalized version of the application name. They
+behave like pre-imported modules. Their contents are discussed later.
+
+Exported functions are prefixed by the module's base name, e.g. functions in the
+"weather.cmdo" module are prefixed by "weather.".
+
+= ".cmdocore" Modules =
+
+Core code modules are similar to ".cmdo" modules in providing Python code for
+internal and external functions. They differ in two ways. Exported functions are
+not prefixed by a module namespace and the modules are pre-loaded, rather than
+loaded on demand.
+
+= ".cmdodoc" Modules =
+
+These modules supply raw "structured text" for help documentation. The resources
+are accessed by module base name and formatted by a chosen "publisher" or by the
+default text publisher. E.g. "tutorial.cmdodoc" can produce documentation for
+"myapp" using the command "myapp help tutorial". The "format=" keyword option
+can select the "html", "xml", "text" (default), or other publisher. The
+"view=yes" keyword option/value causes it to load in the viewer or browser
+registered by mime type.
+
+Syntax is identical for all documentation, whether placed in a ".cmdodoc" module
+or in doc strings inside a code module. It is similar to the formats used by
+wiki collaborative text web sites. It supports headings, lists, tables, plain
+text, macros, and arbitrary Python code. Structured text syntax is described
+more fully in a later section.
+
+
+------------------------------------
+ Tutorial - Building an Application 
+------------------------------------
+
+The following sections build a sample application called "Todo" that, as you may
+surmise, manages a to-do list from the command line.
+
+The Main Executable
+-------------------
+
+All a main program has to do is import and call "cmdo.main()", and supply a
+version number argument. Version number strings can be arbitrary or meaningful.
+It merely becomes the return value from the version() function. Here's what the
+"todo" script might look like if you want the "todo version" command to display
+"todo 0.1".
+
+  #!/usr/bin/env python
+  from cmdo import main
+  if __name__ == '__main__':
+      main('0.1')
+
+Create this script, make it executable, and place it somewhere in the system
+path, e.g./usr/local/bin/todo. Run it and verify that you see a basic help
+screen. Note that the first time you run it the directory "~/.todo" gets
+created. Try "todo version" and check the version number. It reports version
+numbers for both the application and the engine.
+
+Adding Functions
+----------------
+
+The only functions we have at this point are "help" and "version". So now we
+want to add real to-do list functionality to a new module. The following command
+displays the available module directories.
+
+  todo 'print CMDO.program.dirsScript'
+
+Functions can either reside in ".cmdo" or ".cmdocore" modules, depending on
+whether or not you wish to use the module name as a prefix and whether or not
+you want them pre-loaded. For our example we'll write 3 functions to work with
+to-do list items. We expect to add more later, e.g. to display a fancy calendar.
+
+It makes sense to name the module designated to work with the to-do item list
+"list.cmdo". It will supply the "list.add", "list.remove" and "list.show"
+functions. Later we might add a "calendar.cmdo" module and others.
+
+Create and edit a new file, "~/.todo/todo.d/list.cmdo", or for a more
+permanent/shared location, "/usr/local/lib/todo/todo.d/list.cmdo". You probably
+have to first create the directory, for example:
+
+  mkdir -p /usr/local/lib/todo/todo.d
+
+Of course, depending on location, you may need root privileges, so the following
+may work better (example user is "john").
+
+  sudo mkdir -p /usr/local/lib/todo/todo.d
+  sudo chown -R john /usr/local/lib/todo
+
+This document won't explain many of the implementation details, but notice how
+it's all ordinary Python code.
+
+The first line tricks editors into showing Python syntax highlighting.
+
+  #!/usr/bin/env python
+
+Then we establish the data file path and set up the global variable to hold an
+item list in memory.
+
+  import os.path
+  path  = os.path.expanduser('~/.todo/list')
+  items = None
+
+The first utility function, getItems(), loads the item list from the file if
+it's not already loaded.
+
+  def getItems():
+      global items
+      if items is None:
+          items = []
+          if os.path.exists(path):
+              f = open(path)
+              for line in open(path):
+                  fields = line.strip().split(' ', 1)
+                  items.append((int(fields[0]), fields[1]))
+              f.close()
+              items.sort(cmp = lambda x, y: cmp(y[0], x[0]))
+      return items
+
+The other needed utility function, saveItems(), saves the item list from memory
+to file.
+
+  def saveItems(items):
+      if items is not None:
+          f = open(path, 'w')
+          for item in items:
+              f.write('%d %s\n' % (item[0], item[1]))
+          f.close()
+
+The remaining functions are intended to serve as the to-do list's external
+interface.
+
+The add() function adds a task and priority to the item list and saves to disk.
+
+  def add(priority, task):
+      'Add a prioritized task'
+      items = getItems()
+      items.append((priority, task))
+      saveItems(items)
+
+The remove() function removes a task by index number and saves to disk.
+
+  def remove(i):
+      'Delete a task by index.  Use the show to see index numbers.'
+      items = getItems()
+      del items[i]
+      saveItems(items)
+
+The show() function displays the sorted list sorted with index numbers.
+
+  def show():
+      'Show task list sorted by priority with index numbers.'
+      items = getItems()
+      items.sort(cmp = lambda x, y: cmp(y[0], x[0]))
+      i = 0
+      for item in items:
+          i += 1
+          print '%d) %d %s' % (i, item[0], item[1])
+
+If this file had a ".py" extension you could import it and use the functions
+without any changes. But you'd still need to implement a command line interface,
+interpret options, validate input, format help screens, and invoke functions.
+
+Cmdo performs these services automatically once you decorate your functions to
+specify expected argument types. Argument types are generally classes that
+implement a convert() method to take raw input, validate it, and return
+appropriate data.
+
+If you run "todo help" you should see the same output you saw before. Your new
+functions are invisible without the decorators. If you want to check that the
+new module loads run this.
+
+  todo -v
+
+Look through the verbose output for a line similar to this.
+
+  Loading script "/usr/local/lib/todo/todo.d/list.cmdo"...
+
+Decorating Functions
+--------------------
+
+The "@CMDO.export" decorator serves two purposes. It tells the Cmdo engine to
+expose the function externally and supplies type information for validating and
+converting raw input arguments.
+
+The decorator accepts zero or more types, which can either be subclasses or
+subclass instances derived from CMDO.TypeBase. In other words, you can leave out
+the parentheses when no type arguments are needed.
+
+Basic types like CMDO.Integer, CMDO.String are already defined. Here we create
+two custom types for Priority and list Index by overriding CMDO.Integer.
+
+The Priority type class uses the "imin" and "imax" keyword arguments to limit
+the acceptable range of integer values. It also specifies a better description
+(through the "desc" keyword argument).
+
+The Index type class specifies a minimum value and a description. It also
+overrides convert() to check against the loaded item list and to adjust external
+1-n values to start at zero internally. "CMDO.ExcBase" exceptions (or
+subclasses) receive special treatment to display a cleaner error trace.
+
+  class Priority(CMDO.Integer):
+      def __init__(self):
+          CMDO.Integer.__init__(self, imin = 1, imax = 5, desc = 'priority')
+
+  class Index(CMDO.Integer):
+      def __init__(self):
+          CMDO.Integer.__init__(self, imin = 1, desc = 'index')
+      def convert(self, value):
+          i = CMDO.Integer.convert(self, value)
+          count = len(getItems())
+          if i > count:
+              raise CMDO.ExcBase('Bad index, %d (%d to-do item%s)'
+                      % (i, count, 's'*(count!=1)))
+          return i - 1
+
+Once custom types are defined we can add "@CMDO.export" decorators to inform the
+engine about exported functions and their expected arguments.
+
+The add() function accepts a pair of arguments. The first is our custom Priority
+type. The second is the task string. Note that Priority is just the class,
+because arguments are unnecessary, and CMDO.String is instantiated to specify a
+description (the "desc" keyword argument). Insert the "@CMDO.export(..." line
+above the add function definition.
+
+  @CMDO.export(Priority, CMDO.String(desc = 'task string'))
+  def add(priority, task):
+      ...
+
+The remove() function accepts an Index argument. Insert the "@CMDO.export(..."
+line above the remove function definition.
+
+  @CMDO.export(Index)
+  def remove(i):
+      ...
+
+The show() function takes no argument, allowing "@CMDO.export" to appear without
+parentheses. Insert it above the show function definition.
+
+  @CMDO.export
+  def show():
+      ...
+
+For your convenience, here is the entire "list.cmdo" source.
+
+  #!/usr/bin/env python
+
+  import os.path
+  path  = os.path.expanduser('~/.todo/list')
+  items = None
+
+  class Priority(CMDO.Integer):
+      def __init__(self):
+          CMDO.Integer.__init__(self, imin = 1, imax = 5, desc = 'priority')
+
+  class Index(CMDO.Integer):
+      def __init__(self):
+          CMDO.Integer.__init__(self, imin = 1, desc = 'index')
+      def convert(self, value):
+          i = CMDO.Integer.convert(self, value)
+          count = len(getItems())
+          if i > count:
+              raise CMDO.ExcBase('Bad index, %d (%d to-do item%s)'
+                      % (i, count, 's'*(count!=1)))
+          return i - 1
+
+  def getItems():
+      global items
+      if items is None:
+          items = []
+          if os.path.exists(path):
+              f = open(path)
+              for line in open(path):
+                  fields = line.strip().split(' ', 1)
+                  items.append((int(fields[0]), fields[1]))
+              f.close()
+              items.sort(cmp = lambda x, y: cmp(y[0], x[0]))
+      return items
+
+  def saveItems(items):
+      if items is not None:
+          f = open(path, 'w')
+          for item in items:
+              f.write('%d %s\n' % (item[0], item[1]))
+          f.close()
+
+  @CMDO.export(Priority, CMDO.String(desc = 'task string'))
+  def add(priority, task):
+      'Add a prioritized task'
+      items = getItems()
+      items.append((priority, task))
+      saveItems(items)
+
+  @CMDO.export(Index)
+  def remove(i):
+      'Delete a task by index.  Use the show to see index numbers.'
+      items = getItems()
+      del items[i]
+      saveItems(items)
+
+  @CMDO.export
+  def show():
+      'Show task list sorted by priority with index numbers.'
+      items = getItems()
+      items.sort(cmp = lambda x, y: cmp(y[0], x[0]))
+      i = 0
+      for item in items:
+          i += 1
+          print '%d) %d %s' % (i, item[0], item[1])
+
+Now you can run "todo" to see the new functions in the help listing. You can
+also run "todo help list.add" to see help for that function. Notice how the
+Python doc string became the description and how the arguments are listed and
+described.
+
+Try this sequence of operations.
+
+First add a few tasks.
+
+  todo list.add 3 "Call Phil"
+  todo list.add 1 "Lunch with Biff"
+  todo list.add 5 "Pick up Judy"
+
+Then list them.
+
+  todo list.show
+
+You see this output.
+
+  1) 5 Pick up Judy
+  2) 3 Call Phil
+  3) 1 Lunch with Biff
+
+Then remove the "Call Phil" task, since you just completed it.
+
+  todo list.remove 2
+
+Confirm the task is gone.
+
+  todo list.show
+
+You now see this.
+
+  1) 5 Pick up Judy
+  2) 1 Lunch with Biff
+
+Try using bad indexes or priorities to see the error handling.
+
+Notice how the key functions are uncluttered by anything by relevant code.
+
+
+----------------------
+ Adding Documentation 
+----------------------
+
+You saw how function level help gets generated based on doc strings and the
+export decorator arguments. You can also create more general documentation that
+is also available from the command line by using ".cmdodoc" modules.
+
+Documentation modules use syntax inspired by wiki technology. Special markup
+that blends well with plain text leaves a document readable in both raw form and
+after transforming to text, HTML, etc. Cmdo supports text, HTML and XML formats
+via the format keyword of the help command. It also supports loading in a viewer
+application by using the mailcap mime type database.
+
+The text format called "structured text" is described below.
+
+Structured Text Syntax
+----------------------
+
+= Headings (whole line) =
+
+  !<text>             Section/heading level 1
+  !!<text>            Section/heading level 2
+  !!!<text>           Section/heading level 3
+  ...
+
+Headings can be continued by lines starting with a "+".
+
+= Lists (whole line) =
+
+  #<text>             Numbered list level 1
+  ##<text>            Numbered list level 2
+  ###<text>           Numbered list level 3
+  ...
+  *<text>             Bulleted list level 1
+  **<text>            Bulleted list level 2
+  ***<text>           Bulleted list level 3
+  ...
+
+List items can be continued by lines starting with a "+".
+
+= Tables (whole line) =
+
+  |!...|....|         Header row
+  |....|....|         Normal cell row
+
+Table rows can be continued by lines starting with a "+".
+
+= Links (within line) =
+
+  [[<URL>]]           URL without label
+  [[Label=<URL>]]     URL with label
+
+= Macros (within line): =
+
+  {{<code>}}          Macro for evaluation
+
+Macros are good for injecting calculated data or text containing special
+characters. Macros can be any Python expression returning a string. It can call
+functions, reference variables, etc.
+
+= Plain text (multi-line block) =
+
+  '''
+  <plain text block>
+  ...
+  '''
+
+or
+
+  """
+  <plain text block>
+  ...
+  """
+
+Both triple single and double quotes are accepted to allow plain text blocks
+containing one or the other type of quotings, e.g. for Python doc strings in
+sample code. It also makes it easier to use plain text blocks inside Python doc
+strings, e.g. for Cmdo function/module structured text documentation.
+
+= Python code (multi-line block) =
+
+  {{{
+  <Python code>
+  ...
+  }}}
+
+Code blocks are executed, rather than evaluated. It doesn't produce text, but
+can set meta-data, import modules, and create symbols used by evaluated macros.
+
+For example, to inject a time stamp, combine a code block with one or more
+macros.
+
+  {{{
+  from time import asctime
+  }}}
+  ...
+  The date and time is "{{asctime()}}".
+
+This will produce something like:
+
+  The date and time is "Mon Apr 30 11:01:03 2007".
+
+Adding a Documentation Module
+-----------------------------
+
+Place the text listed below in "tutorial.cmdodoc", which you can add to the same
+directory as "list.cmdo". Afterwards run this command for text format help...
+
+  todo help tutorial
+
+... or this command for HTML output viewed in your browser.
+
+  todo help tutorial format=html view=yes
+
+= Tutorial Documentation Module Source =
+
+  !To-Do Tutorial
+
+  !!Prerequisites
+
+  |!Name|Description|
+  |[[Cmdo=http://wijjo.com/cmdo]]|The primary engine|
+  |[[Python=http://www.python.org]]|The implementation language|
+
+  !!Introduction
+
+  We will do the following in order to introduce you to your new to-do list
+  manager.
+  # Add a few prioritized tasks.
+  # List tasks by priority.
+  # Complete a task and remove it.
+  # List tasks again to confirm removal.
+
+  !!Add Tasks
+  '''
+  todo list.add 3 "Call Phil"
+  todo list.add 1 "Lunch with Biff"
+  todo list.add 5 "Pick up Judy"
+  '''
+
+  !!List Tasks
+  '''
+  todo list.show
+  '''
+  You should see this output.
+  '''
+  1) 5 Pick up Judy
+  2) 3 Call Phil
+  3) 1 Lunch with Biff
+  '''
+
+  !!Remove Completed Task
+  '''
+  todo list.remove 2
+  '''
+  Confirm the task is gone.
+  '''
+  todo list.show
+  '''
+  You now see this.
+  '''
+  1) 5 Pick up Judy
+  2) 1 Lunch with Biff
+  '''
+

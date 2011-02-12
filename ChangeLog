@@ -1,0 +1,28 @@
+Cmdo Changelog
+--------------
+
+0.8 - 2008-01-30
+----------------
+	* Full support for install-less execution
+	* Provide better default help title
+	* Add command to edit new or existing module/function code
+
+0.7 - 2007-08-05 13:09:28 -0700
+-------------------------------
+	* Better file save versioning and backup
+	* new-version script for easier version transitions
+
+0.6 - 2007-6-21
+---------------
+	* More flexible TOC (table of contents) with selectable start/stop levels
+	* Hide TOC when printing
+	* Initial support for selectable stylesheets (add "small" style)
+
+0.5 - 2007-5-25
+---------------
+	* Many improvements
+	* Ready for alpha
+
+0.1 - 2007-2-14
+---------------
+	* Project created
