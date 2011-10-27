@@ -318,9 +318,9 @@ class ArchiveDirectory(ArchiveItem):
         runner.run()
 
     def restore(self):
-        target = CMDO.getVersionedPath(path)
+        target = CMDO.getVersionedPath(self.path)
         runner = Runner(dryRun = self.options.dryrun)
-        runner.append(Global.cpcmd, Q(path), Q(target))
+        runner.append(Global.cpcmd, Q(self.path), Q(target))
         CMDO.info('Restoring to "%s"...' % target)
         runner.run()
 
@@ -338,18 +338,18 @@ class ArchiveFile(ArchiveItem):
     def __init__(self, path, **opts):
         ArchiveItem.__init__(self, path, **opts)
 
-    def create(self, path):
+    def create(self):
         runner = Runner(dryRun = self.options.dryrun)
         if self.options.delete:
-            runner.append('mv', '-v', Q(path), Q(self.target))
+            runner.append('mv', '-v', Q(self.path), Q(self.target))
         else:
-            runner.append(Global.cpcmd, Q(path), Q(self.target))
+            runner.append(Global.cpcmd, Q(self.path), Q(self.target))
         runner.run()
 
     def restore(self, path):
-        target = CMDO.getVersionedPath(path)
+        target = CMDO.getVersionedPath(self.path)
         runner = Runner(dryRun = self.options.dryrun)
-        runner.append(Global.cpcmd, Q(path), Q(target))
+        runner.append(Global.cpcmd, Q(self.path), Q(target))
         CMDO.info('Restoring to "%s"...' % target)
         runner.run()
 
@@ -495,7 +495,7 @@ def save(*files, **opts):
     for f in files:
         for path in glob(f):
             fm = FMFactory.forPath(path, **opts)
-            fm.create(path)
+            fm.create()
 
 #===============================================================================
 
