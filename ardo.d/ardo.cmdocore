@@ -210,7 +210,7 @@ class ArchiveZip(ArchiveItem):
 
     def create(self):
         runner = Runner(dryRun = self.options.dryrun)
-        runner.append('zip', '-r')
+        runner.append('zip', '-r', '--symlinks')
         #TODO: Add object file exclusions?
         #TODO: Add VCS exclusions?
         runner.addArgs(Q(self.target, '.zip'), Q(self.path))
