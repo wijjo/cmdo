@@ -43,9 +43,45 @@ class Global(object):
     subdir = '.%s' % CMDO.program.name
 
     # Filespecs for --ignoreobj option exclusions
-    excObjPats = ("*.o", "*.so", "*.pyc", "*.Plo", "*.la", "*.lai", "*.lo", "*.a", "*/.*")
+    excObjPats = (
+        '*.o',
+        '*.so',
+        '*.so.*',
+        '*.co',
+        '*.pyc',
+        '*.pyd',
+        '*.Plo',
+        '*.la',
+        '*.lai',
+        '*.lo',
+        '*.a',
+        '*.dll',
+        '*.DLL',
+        '*.exe',
+        '*.EXE',
+        '*.lib',
+        '*.LIB',
+        '*.dylib',
+        '*.jnilib',
+        '*.jar',
+        '*.deb',
+        '*.rpm',
+        '*.zip',
+        '*.ZIP',
+        '*.gz',
+        '*.tgz',
+        '*.bz2',
+        '*.sym',
+        '*.bin',
+        '*/.*',
+        '*/tags',
+    )
     # Subdirectories ignored for --ignorevcs option
-    excVCSDirs = ('.svn', '.cvs')
+    excVCSDirs = (
+        '.svn',
+        '.cvs',
+        '.git',
+    )
     patArchive = '"%s"-[0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]*'
 
     reTarballTrailer = re.compile('^[.]%s/(.*)-([0-9]+-[0-9]+)([.]tar)?[.](gz|bz2)$'
@@ -211,9 +247,15 @@ class ArchiveZip(ArchiveItem):
     def create(self):
         runner = Runner(dryRun = self.options.dryrun)
         runner.append('zip', '-r', '--symlinks')
-        #TODO: Add object file exclusions?
-        #TODO: Add VCS exclusions?
         runner.addArgs(Q(self.target, '.zip'), Q(self.path))
+        # Add object file exclusions?
+        if self.options.ignoreobj:
+            for pat in Global.excObjPats:
+                runner.addArgs('--exclude', Q(pat))
+        # Add VCS exclusions?
+        if self.options.ignorevcs:
+            for pat in Global.excVCSDirs:
+                runner.addArgs('--exclude', Q('*/', pat, '/*'))
         # Delete original when done?
         if self.options.delete:
             runner.append('rm', '-rvf', Q(self.path))
@@ -243,8 +285,14 @@ class ArchiveP7Zip(ArchiveItem):
     def create(self):
         runner = Runner(dryRun = self.options.dryrun)
         runner.append('7z', 'a')
-        #TODO: Add object file exclusions?
-        #TODO: Add VCS exclusions?
+        # Add object file exclusions?
+        if self.options.ignoreobj:
+            for pat in Global.excObjPats:
+                runner.addArgs(Q('-xr!', pat))
+        # Add VCS exclusions?
+        if self.options.ignorevcs:
+            for pat in Global.excVCSDirs:
+                runner.addArgs(Q('-xr!', pat, '/*'))
         runner.addArgs(Q(self.target, '.7z'), Q(self.path))
         # Delete original when done?
         if self.options.delete:
