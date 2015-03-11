@@ -71,6 +71,7 @@ class Global(object):
         '*.gz',
         '*.tgz',
         '*.bz2',
+        '*.xz',
         '*.sym',
         '*.bin',
         '*/.*',
@@ -177,6 +178,8 @@ class ArchiveTarball(ArchiveItem):
             return None
         if m.group(4) == 'bz2':
             return ArchiveTarball(path, 'bzip2', **opts)
+        if m.group(4) == 'xz':
+            return ArchiveTarball(path, 'xz', **opts)
         return ArchiveTarball(path, 'gzip', **opts)
 
     def __init__(self, path, compression, **opts):
@@ -185,6 +188,9 @@ class ArchiveTarball(ArchiveItem):
         if self.compression == 'bzip2':
             self.tarCompOpt = 'j'
             self.tarExt = '.tar.bz2'
+        elif self.compression == 'xz':
+            self.tarCompOpt = 'J'
+            self.tarExt = '.tar.xz'
         else:
             self.tarCompOpt = 'z'
             self.tarExt = '.tar.gz'
@@ -320,6 +326,8 @@ class ArchiveCompressedFile(ArchiveItem):
             return ArchiveCompressedFile(path, 'gzip', **opts)
         if ext == '.bz2':
             return ArchiveCompressedFile(path, 'bzip2', **opts)
+        if ext == '.xz':
+            return ArchiveCompressedFile(path, 'xz', **opts)
         return None
 
     def __init__(self, compression, **opts):
@@ -577,6 +585,23 @@ def bzip2(*files, **opts):
     for f in files:
         for path in glob(f):
             fm = ArchiveTarball(path, "bzip2", **opts)
+            fm.create()
+
+#===============================================================================
+
+@CMDO.export(
+    PathList,
+    delete     = DeleteOption,
+    ignoreobj  = SourceOnlyOption,
+    ignorevcs  = IgnoreVCSOption,
+    dryrun     = DryRunOption,
+    noprogress = NoProgressOption,
+    target     = TargetOption
+)
+def xz(*files, **opts):
+    for f in files:
+        for path in glob(f):
+            fm = ArchiveTarball(path, "xz", **opts)
             fm.create()
 
 #===============================================================================
