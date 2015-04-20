@@ -102,6 +102,16 @@ class Global(object):
     # Display progress with "pv", if available.
     pvAvailable = CMDO.findProgram('pv')
 
+    # Use "pigz" for gzip compression, if available.
+    gzip_replacement = CMDO.findProgram('pigzx')
+
+    # Use "pbzip2" or "lbzip2" for bzip2 compression, if available.
+    bzip2_replacement = None
+    for replacement_name in ['pbzip2', 'lbzip2']:
+        bzip2_replacement = CMDO.findProgram(replacement_name)
+        if bzip2_replacement:
+            break
+
 #===============================================================================
 
 def Q(*args):
@@ -187,17 +197,27 @@ class ArchiveTarball(ArchiveItem):
         self.compression = compression
         if self.compression == 'bzip2':
             self.tarCompOpt = 'j'
+            self.externalCompressionProgram = Global.bzip2_replacement
             self.tarExt = '.tar.bz2'
         elif self.compression == 'xz':
+            if  'XZ_OPTS' in os.environ:
+                os.environ['XZ_OPTS'] = '%s --threads=0' % os.environ['XZ_OPTS']
+            else:
+                os.environ['XZ_OPTS'] = '--threads=0'
             self.tarCompOpt = 'J'
+            self.externalCompressionProgram = None
             self.tarExt = '.tar.xz'
         else:
             self.tarCompOpt = 'z'
+            self.externalCompressionProgram = Global.gzip_replacement
             self.tarExt = '.tar.gz'
         if Global.pvAvailable and not self.options.noprogress:
-            self.tarCreateOpts = ['-c%s' % self.tarCompOpt, '-f']
+            self.tarCreateOpts = ['-c%s' % self.tarCompOpt]
         else:
-            self.tarCreateOpts = ['-cv%s' % self.tarCompOpt, '-f']
+            self.tarCreateOpts = ['-cv%s' % self.tarCompOpt]
+        if self.externalCompressionProgram:
+            self.tarCreateOpts.extend(['--use-compress-program', self.externalCompressionProgram])
+        self.tarCreateOpts.append('-f')
         self.tarRestoreOpts = '-%s%s%s' % ('x', self.tarCompOpt, 'pf')
         self.tarCompareOpts = '-%s%s%s' % ('d', self.tarCompOpt, 'f')
 
